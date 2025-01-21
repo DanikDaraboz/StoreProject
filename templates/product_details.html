@@ -1,0 +1,11 @@
+{{ define "content" }}
+<section class="product-details">
+    <div class="container">
+        <h2>{{ .ProductName }}</h2>
+        <img src="{{ .ImageURL }}" alt="{{ .ProductName }}">
+        <p>{{ .Description }}</p>
+        <p><strong>Price:</strong> {{ .Price }}</p>
+        <a href="/products" class="button">Back to Products</a>
+    </div>
+</section>
+{{ end }}
