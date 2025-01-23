@@ -1,39 +1,35 @@
 package main
 
 import (
-	"html/template"
-	"net/http"
+    "html/template"
+    "net/http"
+    "log"
 )
 
-var (
-	templates = make(map[string]*template.Template)
-)
-
-func init() {
-	layout := template.Must(template.New("layout").ParseFiles("templates/layout.html"))
-	header := template.Must(template.New("header").ParseFiles("templates/partials/header.html"))
-	footer := template.Must(template.New("footer").ParseFiles("templates/partials/footer.html"))
-
-	templates["layout"] = layout
-	templates["header"] = header
-	templates["footer"] = footer
-}
+var templates = template.Must(template.ParseFiles(
+    "templates/layout.html",
+    "templates/partials/header.html",
+    "templates/partials/footer.html",
+))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	err := templates[tmpl].Execute(w, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+    err := templates.ExecuteTemplate(w, tmpl, data)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        log.Println("Template error:", err)
+    }
 }
 
 func main() {
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+    fs := http.FileServer(http.Dir("static"))
+    http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		renderTemplate(w, "layout", map[string]interface{}{
-			"Title": "Home",
-		})
-	})
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        renderTemplate(w, "layout.html", map[string]interface{}{
+            "Title": "Home",
+        })
+    })
 
-	http.ListenAndServe(":8080", nil)
+    log.Println("Server running on http://localhost:8080")
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }
