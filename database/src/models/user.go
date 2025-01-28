@@ -7,3 +7,11 @@ type User struct {
 	Username string             `bson:"username"`
 	Password string             `bson:"password"`
 }
+
+type Product struct {
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	Name        string             `bson:"name"`
+	Price       string             `bson:"price"`
+	Description string             `bson:"description"`
+	ImageURL    string             `bson:"imageUrl"`
+}
