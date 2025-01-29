@@ -1,0 +1,344 @@
+
+:root {
+    --background-color: white;
+    --text-color: #333;
+    --header-background: #fff; /* Белый цвет для хедера */
+    --footer-background: #333;
+    --button-background: #008CBA;
+    --button-hover-background: #007B8C;
+    --link-color: #008CBA;
+    --product-card-background: white;
+    --product-card-shadow: rgba(0, 0, 0, 0.1);
+    --transition-duration: 0.3s; /* Duration of the transition */
+}
+
+/* Dark Theme Styles */
+body.dark-theme {
+    --background-color: #333;
+    --text-color: white;
+    --header-background: #1a1a1a;
+    --footer-background: #1a1a1a;
+    --button-background: #4CAF50;
+    --button-hover-background: #45a049;
+    --link-color: #4CAF50;
+    --product-card-background: #444;
+    --product-card-shadow: rgba(0, 0, 0, 0.3);
+}
+
+
+/* General body styles */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+
+/* Header styling */
+header {
+    background-color: var(--header-background);
+    color: white;
+    text-align: center;
+    transition: background-color var(--transition-duration);
+}
+
+/* Footer styling */
+footer {
+    background-color: var(--footer-background);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    width: 100%;
+    bottom: 0;
+    transition: background-color var(--transition-duration);
+}
+
+/* Main content area */
+main {
+    padding: 20px;
+}
+
+/* Product list grid layout */
+.product-list {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Styling for each product card */
+.product-card {
+    background-color: var(--product-card-background);
+    width: 200px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px var(--product-card-shadow);
+    text-align: center;
+    transition: background-color var(--transition-duration), box-shadow var(--transition-duration);
+}
+
+.product-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.product-card h2 {
+    font-size: 18px;
+    color: var(--text-color);
+    margin-top: 10px;
+}
+
+.product-price {
+    font-size: 16px;
+    color: #888;
+    margin: 10px 0;
+}
+
+.view-details {
+    background-color: var(--button-background);
+    color: white;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color var(--transition-duration);
+}
+
+.view-details:hover {
+    background-color: var(--button-hover-background);
+}
+
+/* Product detail page */
+.product-detail {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.product-detail-image {
+    width: 300px;
+    height: auto;
+    border-radius: 8px;
+}
+
+.product-info {
+    max-width: 400px;
+}
+
+.product-info h2 {
+    font-size: 24px;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: var(--button-background);
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color var(--transition-duration);
+}
+
+button:hover {
+    background-color: var(--button-hover-background);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+
+.theme-toggle:hover {
+    background-color: #f0f0f0;
+}
+button, .go-back-button {
+    background-color: var(--button-background);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none; /* For the <a> link */
+    transition: background-color var(--transition-duration);
+}
+
+button:hover, .go-back-button:hover {
+    background-color: var(--button-hover-background);
+}
+
+
+.navbar {
+    height: 50px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-list {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-item {
+    position: relative;
+    margin:10px;
+}
+
+.nav-item a, .nav-item #catalog-text {
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+
+
+.nav-item.active a {
+    font-weight: bold;
+    color: black;
+}
+
+/* Основной контейнер для каталога */
+.catalog {
+    position: relative;
+}
+
+/* Текст каталога с курсором в виде указателя */
+#catalog-text {
+    cursor: pointer;
+    transition: color 0.3s ease; /* Плавный переход для цвета текста */
+}
+
+/* Стили для выпадающего меню */
+.category-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    z-index: 10;
+}
+
+/* Стили для списка категорий */
+.category-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Стили для пунктов меню категорий */
+.category-menu li {
+    padding: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease; /* Плавный переход для цвета текста */
+}
+
+/* Изменение фона при наведении на элемент меню */
+.category-menu li:hover {
+    background-color: #f1f1f1;
+}
+
+/* При наведении на каталог показывается меню */
+.catalog:hover .category-menu {
+    display: block;
+}
+
+/* Меняем цвет текста на черный при наведении */
+.catalog:hover #catalog-text {
+    color: black; /* Черный цвет текста */
+}
+
+/* Меняем цвет текста на черный для пунктов меню при наведении */
+.catalog:hover .category-menu li {
+    color: black; /* Черный цвет текста для пунктов */
+}
+
+/* Кнопка для смены темы */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Размер иконок */
+.theme-icon {
+    width: 40px;  /* Размер иконки */
+    height: 40px;
+}
+
+/* Скрыть иконку луны по умолчанию */
+#moon-icon {
+    display: none;
+}
+
+
+/* Стили для темной темы */
+body.dark-theme {
+    background-color: #121212;
+    color: #fff;
+}
+
+body.dark-theme .navbar {
+    background-color: #333;
+}
+
+body.dark-theme .nav-item a, body.dark-theme .nav-item #catalog-text {
+    color: #ccc;
+}
+
+body.dark-theme .nav-item.active a {
+    color: white;
+}
+
+body.dark-theme .category-menu {
+    background-color: white;
+}
+
+body.dark-theme .category-menu li {
+    color: #ccc;
+}
+
+body.dark-theme .category-menu li:hover {
+    background-color: #444;
+}
+
+
+
+.img1{
+    width: 100%;
+}
+.logo-link{
+    position: absolute;
+    margin-right: 1800px;
+    margin-top: 20px;
+}
+.logo{
+    display: flex;
+    justify-content: left;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+}
