@@ -73,7 +73,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Start Registration Handler")
 	var registerRequest RegisterRequest
-	err := json.NewDecoder(r.Body).Decode(RegisterRequest{})
+	err := json.NewDecoder(r.Body).Decode(&registerRequest)
 	if err != nil {
 		log.Printf("Error on decode: %v\n", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
