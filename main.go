@@ -9,6 +9,8 @@ import (
 	"github.com/DanikDaraboz/StoreProject/database/src/middleware"
 	"github.com/DanikDaraboz/StoreProject/database/src/utils"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	"os"
 )
 
 var templates = template.Must(template.ParseFiles(
@@ -28,7 +30,17 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 }
 
 func main() {
+	err := godotenv.Load("database/.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	utils.ConnectDB()
+	log.Println("Application started")
+
+	dbName := os.Getenv("DB_NAME")
+	secretKey := os.Getenv("SECRET_KEY")
+	log.Printf("DB_NAME: %s", dbName)
+	log.Printf("SECRET_KEY: %s", secretKey)
 	r := mux.NewRouter()
 
 	fs := http.FileServer(http.Dir("static"))
@@ -57,12 +69,11 @@ func main() {
 	r.Handle("/api/users", middlewares.AuthMiddleware(http.HandlerFunc(handlers.GetUsersHandler))).Methods("GET")
 	r.HandleFunc("/api/users/register", handlers.RegisterHandler).Methods("POST")
 	r.HandleFunc("/api/users/login", handlers.LoginHandler).Methods("POST")
-
-	// Wrap router with middlewares
 	loggedRouter := middlewares.LoggingMiddleware(r)
-
 	http.Handle("/", loggedRouter)
 
-	log.Println("Server running on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	pwd, _ := os.Getwd()
+	log.Println("Текущая рабочая директория:", pwd)
+	log.Println("Server running on http://localhost:8081")
+	log.Fatal(http.ListenAndServe(":8081", r))
 }

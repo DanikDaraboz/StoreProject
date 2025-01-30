@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -22,10 +21,6 @@ import (
 )
 
 func getDBCollection(collectionName string) (*mongo.Collection, context.Context, func()) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
 		dbName = "testdb"
@@ -70,54 +65,48 @@ func generateToken(username string) (string, error) {
 
 	return signedToken, nil
 }
+
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
+	log.Println("Start Registration Handler")
 	var registerRequest RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(RegisterRequest{})
 	if err != nil {
-		log.Printf("Invalid request body: %v\n", err)
+		log.Printf("Error on decode: %v\n", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
+	}
+	log.Printf("Request successfully decoded: %+v", registerRequest)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerRequest.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("Error hashing password: %v\n", err)
+		http.Error(w, "Failed to register user", http.StatusInternalServerError)
+		return
+	}
+
+	user := models.User{
+		ID:       primitive.NewObjectID(),
+		Username: registerRequest.Username,
+		Password: string(hashedPassword),
 	}
 
 	collection, ctx, cancel := getDBCollection("users")
 	defer cancel()
 
-	// Check if username already exists
-	var existingUser models.User
-	err = collection.FindOne(ctx, bson.M{"username": registerRequest.Username}).Decode(&existingUser)
-	if err == nil {
-		http.Error(w, "Username already exists", http.StatusBadRequest)
-		return
-	} else if err.Error() != "mongo: no documents in result" {
-		log.Printf("Error checking existing user: %v\n", err)
+	_, err = collection.InsertOne(ctx, user)
+	if err != nil {
+		log.Printf("Failed to insert user: %v\n", err)
 		http.Error(w, "Failed to register user", http.StatusInternalServerError)
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerRequest.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("Failed to hash password: %v\n", err)
-		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
-		return
-	}
-
-	newUser := models.User{
-		Username: registerRequest.Username,
-		Password: string(hashedPassword),
-	}
-	_, err = collection.InsertOne(ctx, newUser)
-	if err != nil {
-		log.Printf("Failed to register user: %v\n", err)
-		http.Error(w, "Failed to register user", http.StatusInternalServerError)
-		return
-	}
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "User Registered")
+	log.Println("End Registration Handler")
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -205,10 +194,6 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
 		dbName = "testdb"
@@ -252,10 +237,6 @@ func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
 		dbName = "testdb"
