@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles2.css">
+</head>
+<body>
+    <header>
+        
+        <nav class="navbar">
+            <a href="#home" class="logo-link">
+                <img src="/static/images/logo.png" alt="Logo" class="logo">
+            </a>
+            <ul class="nav-list">
+                <li class="nav-item active"><a href="/h">Home</a></li>
+                <li class="nav-item"> <div class="catalog">
+                    <span id="catalog-text">Catalog</span>
+                    <div class="category-menu">
+                        <ul>
+                            <li data-category="all">All products</li>
+                            {{range .Categories}}
+                                <li data-category="{{.}}">{{.}}</li>
+                            {{end}}
+                        </ul>
+                    </div>
+                </div></li>
+                <li class="nav-item"><a href="#men">Men</a></li>
+                <li class="nav-item"><a href="#women">Women</a></li>
+                <!-- Перемещаем кнопку смены темы сюда -->
+                <li class="nav-item">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <img id="sun-icon" src="/static/images/sun.png" alt="Sun Icon" class="theme-icon">
+                        <img id="moon-icon" src="/static/images/moon.png" alt="Moon Icon" class="theme-icon">
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+    <div class="auth2">
+        <div class="auth-container">
+            <h2 class="signin">Sign Up</h2>
+            <form action="/register" method="POST">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+    
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+    
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+    
+                <button type="submit">Sign Up</button>
+            </form>
+            <p>Already have an account? <a href="/login">Sign In</a></p>
+        </div>
+    </div>
+    </main>
+
+    <footer style="margin-top: 400px;">
+        <p>&copy; 2025 Sports Goods Store</p>
+    </footer>
+
+    <!-- Link to the external JS file -->
+    <script src="/static/theme-toggle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Name}}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>{{.Name}}</h1>
+        <a href="/" class="go-back-button">Go back</a>
+    </header>
+
+    <main>
+        <div class="product-detail">
+            <img src="{{.Image}}" alt="{{.Name}}" class="product-detail-image">
+            <div class="product-info">
+                <h2>Price: ${{.Price}}</h2>
+                <button>Add to Cart</button>
+            </div>
+        </div>
+    </main>
+
+    <footer style="margin-top: 400px;">
+        <p>&copy; 2025 Sports Goods Store</p>
+    </footer>
+    <script src="/static/theme-toggle.js"></script>
+</body>
+</html>
