@@ -1,79 +1,62 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
+	"os"
 
-	"github.com/DanikDaraboz/StoreProject/database/src/handlers"
-	"github.com/DanikDaraboz/StoreProject/database/src/middleware"
+	"github.com/DanikDaraboz/StoreProject/database/src/routes"
 	"github.com/DanikDaraboz/StoreProject/database/src/utils"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"os"
+	"github.com/rs/cors"
 )
 
-var templates = template.Must(template.ParseFiles(
-	"templates/layout.html",
-	"templates/partials/header.html",
-	"templates/partials/footer.html",
-	"templates/products.html",
-	"templates/product_details.html",
-))
-
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	err := templates.ExecuteTemplate(w, tmpl, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println("Template error:", err)
-	}
-}
-
 func main() {
-	err := godotenv.Load("database/.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// Load .env file
+	if err := godotenv.Load("/Users/bellyashsh/GolandProjects/StoreProject/database/.env"); err != nil { // Пример
+		log.Println("No .env file found")
 	}
+
+	// Connect to MongoDB
 	utils.ConnectDB()
-	log.Println("Application started")
+	log.Println("Подключение к MongoDB успешно установлено") // Добавлено логирование
 
-	dbName := os.Getenv("DB_NAME")
-	secretKey := os.Getenv("SECRET_KEY")
-	log.Printf("DB_NAME: %s", dbName)
-	log.Printf("SECRET_KEY: %s", secretKey)
-	r := mux.NewRouter()
+	// Create a new router
+	router := mux.NewRouter()
 
-	fs := http.FileServer(http.Dir("static"))
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+	// Маршрут для статических файлов
+	staticDir := "./static"
+	log.Printf("Статическая директория: %s", staticDir)
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		renderTemplate(w, "layout.html", map[string]interface{}{
-			"Title": "Home",
-		})
+	// Setup routes
+	routes.SetupRoutes(router)
+
+	// CORS configuration
+	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
+	if allowedOrigins == "" {
+		allowedOrigins = "http://localhost:3000" // Значение по умолчанию
+	}
+	origins := []string{allowedOrigins}
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   origins,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		Debug:            true, // Включите для отладки, но выключите в production
 	})
 
-	r.HandleFunc("/products", func(w http.ResponseWriter, r *http.Request) {
-		renderTemplate(w, "layout.html", map[string]interface{}{
-			"Title": "Products",
-		})
-	})
+	// Apply CORS middleware to the router
+	handler := c.Handler(router)
 
-	r.HandleFunc("/products/{id}", func(w http.ResponseWriter, r *http.Request) {
-		renderTemplate(w, "layout.html", map[string]interface{}{
-			"Title": "Product Details",
-		})
-	})
+	// Start the server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000" // Default port if not specified
+	}
 
-	r.HandleFunc("/api/products", handlers.GetProductsHandler).Methods("GET")
-	r.HandleFunc("/api/products/{id}", handlers.GetProductByIDHandler).Methods("GET")
-	r.Handle("/api/users", middlewares.AuthMiddleware(http.HandlerFunc(handlers.GetUsersHandler))).Methods("GET")
-	r.HandleFunc("/api/users/register", handlers.RegisterHandler).Methods("POST")
-	r.HandleFunc("/api/users/login", handlers.LoginHandler).Methods("POST")
-	loggedRouter := middlewares.LoggingMiddleware(r)
-	http.Handle("/", loggedRouter)
-
-	pwd, _ := os.Getwd()
-	log.Println("Текущая рабочая директория:", pwd)
-	log.Println("Server running on http://localhost:8081")
-	log.Fatal(http.ListenAndServe(":8081", r))
+	log.Printf("Server is running on port %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
