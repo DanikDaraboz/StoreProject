@@ -3,7 +3,7 @@
     --background-color: white;
     --text-color: #333;
     --header-background: #fff; /* Белый цвет для хедера */
-    --footer-background: #333;
+    --footer-background: black;
     --button-background: #008CBA;
     --button-hover-background: #007B8C;
     --link-color: #008CBA;
@@ -17,7 +17,7 @@ body.dark-theme {
     --background-color: #333;
     --text-color: white;
     --header-background: #1a1a1a;
-    --footer-background: #1a1a1a;
+    --footer-background: black;
     --button-background: #4CAF50;
     --button-hover-background: #45a049;
     --link-color: #4CAF50;
@@ -151,21 +151,15 @@ button:hover {
 
 /* Theme toggle button */
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 15px;
+    width: 45px;
+    height: 45px;
     background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    color: #333;
     transition: background-color var(--transition-duration), color var(--transition-duration);
 }
 
 .theme-toggle:hover {
-    background-color: #f0f0f0;
+    background-color: white;
 }
 button, .go-back-button {
     background-color: var(--button-background);
@@ -190,6 +184,13 @@ button:hover, .go-back-button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+.navbar2 {
+    height: 65px;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    vertical-align: middle;
 }
 
 .nav-list {
@@ -283,10 +284,20 @@ button:hover, .go-back-button:hover {
     padding: 0;
 }
 
+.sign{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 /* Размер иконок */
 .theme-icon {
-    width: 40px;  /* Размер иконки */
-    height: 40px;
+    width: 45px;  /* Размер иконки */
+    height: 45px;
+}
+.theme-icon2 {
+    width: 30px;  /* Размер иконки */
+    height: 30px;
 }
 
 /* Скрыть иконку луны по умолчанию */
@@ -297,13 +308,21 @@ button:hover, .go-back-button:hover {
 
 /* Стили для темной темы */
 body.dark-theme {
-    background-color: #121212;
+    background-color: #1a202c;
     color: #fff;
 }
 
 body.dark-theme .navbar {
-    background-color: #333;
+    background-color: #1a202c;
 }
+
+body.dark-theme .navbar2 {
+    background-color: #1a202c;
+}
+body.dark-theme .theme-toggle:hover {
+    background-color: #1a202c;
+}
+
 
 body.dark-theme .nav-item a, body.dark-theme .nav-item #catalog-text {
     color: #ccc;
@@ -341,4 +360,107 @@ body.dark-theme .category-menu li:hover {
     width: 65px;
     height: 65px;
     border-radius: 50%;
+}
+
+
+
+.sign-in-btn {
+    background-color: green;
+    color: white;
+    padding: 8px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+
+
+
+.auth-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 300px;
+}
+
+.auth-container h2 {
+    margin-bottom: 20px;
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.auth-container button {
+    width: 100%;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.auth-container button:hover {
+    background: #0056b3;
+}
+
+.auth-container p {
+    margin-top: 15px;
+}
+.auth2{
+    display: flex;
+    justify-content: center;
+}
+.car{
+    width:90%;
+}
+#car{
+    height:580px;
+}
+.par{
+    display: flex;
+    justify-content: center;
+}
+#car2{
+    height:580px;
+    width: 100%;
+    transition: transform 0.3s ease-in-out;
+}
+#car2:hover {
+    transform: scale(1.1);
+}
+.imgcont{
+    position: relative;
+    width: 100%; /* Ширина контейнера */
+    overflow: hidden; /* Обрезаем выходящие части */
+    display: flex; /* Чтобы изображение центрировалось */
+    justify-content: center;
+}
+.imgtext {
+    position: absolute;
+    top: 70%;
+    left: 9%;
+    transform: translate(-50%, -50%);
+    font-size: 45px;
+    font-weight: bold;
+    color: rgb(38, 95, 95);
+}
+.htext{
+    color: whitesmoke;
+    font-size: 45px;
+    font-weight: bold;
+}
+
+.carousel-item {
+    transition: opacity 2s ease-in-out !important;
+}
+
+.carousel-item.active {
+    opacity: 1 !important;
 }
