@@ -12,3 +12,6 @@ To check docker logs:
 
 
 To stop and remove running container: ```docker stop go_ecommerce```
+
+
+To run all tests for mongo connection and product endpoints run: ```go test -v ./test```

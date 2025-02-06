@@ -9,10 +9,9 @@ import (
 	"time"
 
 	"github.com/DanikDaraboz/StoreProject/config"
-	"github.com/DanikDaraboz/StoreProject/internal/handlers"
 	"github.com/DanikDaraboz/StoreProject/internal/repository/mongo"
+	"github.com/DanikDaraboz/StoreProject/internal/routes"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
-	
 )
 
 func main() {
@@ -22,14 +21,13 @@ func main() {
 	// Connect to MongoDB
 	mongo.Connect(cfg.MongoURI)
 
-	// HTTP Handlers
-	http.HandleFunc("/products", handlers.ProductHandler)
-	http.HandleFunc("/health", handlers.HealthCheckHandler)
+	// Init router
+	mux := routes.NewRouter()
 
 	// Start the server
 	server := &http.Server{
 		Addr:    ":" + cfg.ServerPort,
-		Handler: nil, // TODO mux
+		Handler: mux, // TODO mux
 	}
 
 	// Graceful shutdown

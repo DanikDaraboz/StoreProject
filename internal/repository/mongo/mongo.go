@@ -5,14 +5,25 @@ import (
 
 	"time"
 
+	"github.com/DanikDaraboz/StoreProject/internal/models"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
+var (
+	Client            *mongo.Client
+	productCollection *mongo.Collection
+)
+
+func PingMongoDB() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	return Client.Ping(ctx, nil)
+}
 
 func Connect(mongoURI string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -33,8 +44,10 @@ func Connect(mongoURI string) {
 
 	logger.InfoLogger.Println("Connected to MongoDB at", mongoURI)
 	Client = client
+	productCollection = Client.Database("ecommerce").Collection("products")
 }
 
+// TODO Pagination?
 func GetProducts() ([]map[string]interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -55,8 +68,48 @@ func GetProducts() ([]map[string]interface{}, error) {
 	return products, nil
 }
 
-func PingMongoDB() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	return Client.Ping(ctx, nil)
+func FetchProductByID(id string) (models.Product, error) {
+	var product models.Product
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return product, err 
+	}
+
+	err = productCollection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&product)
+	return product, err
+}
+
+func InsertProduct(product models.Product) error {
+	product.ID = primitive.NewObjectID()
+	product.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
+	product.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	_, err := productCollection.InsertOne(context.TODO(), product)
+	return err
+}
+
+func UpdateProduct(id string, product models.Product) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	product.UpdatedAt = primitive.NewDateTimeFromTime(time.Now()) 
+
+	_, err = productCollection.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": objID},
+		bson.M{"$set": product},
+	)
+	return err
+}
+
+func RemoveProduct(id string) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = productCollection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	return err
 }
