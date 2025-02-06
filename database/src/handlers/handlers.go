@@ -21,28 +21,24 @@ import (
 	"github.com/DanikDaraboz/StoreProject/database/src/utils"
 )
 
-// Claims определяет структуру данных, хранящихся в JWT
 type Claims struct {
 	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
-// SecretKey - секретный ключ для подписи JWT. В production храните его в переменной окружения.
 var SecretKey = []byte(os.Getenv("SECRET_KEY"))
 
-// RegisterRequest определяет структуру запроса для регистрации
 type RegisterRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Role     string `json:"role"`
 }
 
-// LoginRequest определяет структуру запроса для логина
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-// RegisterHandler обрабатывает запросы на регистрацию
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -59,9 +55,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Получен запрос на регистрацию: Email=%s", registerRequest.Email) // Добавлено логирование
+	log.Printf("Получен запрос на регистрацию: Email=%s", registerRequest.Email)
 
-	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerRequest.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Printf("Ошибка при хешировании пароля: %v", err)
@@ -71,7 +66,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
-		dbName = "Sport_Store" // Default db name
+		dbName = "Sport_Store"
 	}
 
 	collection := utils.DB.Database(dbName).Collection("users")
@@ -79,7 +74,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Check if user already exists
 	var existingUser models.User
 	err = collection.FindOne(ctx, bson.M{"email": registerRequest.Email}).Decode(&existingUser)
 	if err == nil {
@@ -90,13 +84,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ошибка при регистрации", http.StatusInternalServerError)
 		return
 	}
-
-	// Create new user
+	//Посмотрим
 	user := models.User{
 		Email:    registerRequest.Email,
 		Password: string(hashedPassword),
+		Role:     registerRequest.Role,
 	}
-	log.Printf("Создается пользователь: %+v", user) // Добавлено логирование
+	log.Printf("Создается пользователь: %+v", user)
 
 	_, err = collection.InsertOne(ctx, user)
 	if err != nil {
@@ -105,13 +99,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Пользователь успешно зарегистрирован") // Добавлено логирование
+	log.Println("Пользователь успешно зарегистрирован")
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Пользователь успешно зарегистрирован"})
 }
 
-// LoginHandler обрабатывает запросы на логин
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -186,23 +179,40 @@ func generateToken(email string) (string, error) {
 	return signedToken, nil
 }
 
-// GetUsersHandler обрабатывает запросы на получение списка пользователей (пример)
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Пример: просто возвращаем заглушку
-	users := []struct {
-		ID    string `json:"id"`
-		Email string `json:"email"`
-	}{
-		{ID: "1", Email: "test@example.com"},
-		{ID: "2", Email: "test2@example.com"},
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "Sport_Store"
+	}
+	collection := utils.DB.Database(dbName).Collection("users")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		log.Printf("Ошибка при получении пользователей: %v", err)
+		http.Error(w, "Ошибка при получении пользователей", http.StatusInternalServerError)
+		return
+	}
+	defer cursor.Close(ctx)
+
+	var users []models.User // Используем структуру models.User
+	if err := cursor.All(ctx, &users); err != nil {
+		log.Printf("Ошибка при декодировании пользователей: %v", err)
+		http.Error(w, "Ошибка при декодировании пользователей", http.StatusInternalServerError)
+		return
 	}
 
-	json.NewEncoder(w).Encode(users)
+	if err := json.NewEncoder(w).Encode(users); err != nil {
+		log.Printf("Ошибка при кодировании пользователей в JSON: %v", err)
+		http.Error(w, "Ошибка при кодировании пользователей в JSON", http.StatusInternalServerError)
+		return
+	}
 }
 
-// GetCategoriesHandler обрабатывает запросы на получение списка категорий
 func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -215,7 +225,43 @@ func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetProductsHandler обрабатывает запросы на получение списка продуктов
+func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var product models.Product
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		log.Printf("Ошибка при разборе JSON: %v", err)
+		http.Error(w, "Неверный запрос", http.StatusBadRequest)
+		return
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "Sport_Store"
+	}
+
+	collection := utils.DB.Database(dbName).Collection("products")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err = collection.InsertOne(ctx, product)
+	if err != nil {
+		log.Printf("Ошибка при вставке продукта: %v", err)
+		http.Error(w, "Ошибка при создании продукта", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Продукт успешно создан"})
+}
+
 func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -229,12 +275,11 @@ func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Pagination parameters
 	limitStr := r.URL.Query().Get("limit")
 	offsetStr := r.URL.Query().Get("offset")
 
-	limit := 10 // Default limit
-	offset := 0 // Default offset
+	limit := 10
+	offset := 0
 
 	if limitStr != "" {
 		l, err := strconv.Atoi(limitStr)
@@ -260,7 +305,6 @@ func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Count total number of products
 	total, err := collection.CountDocuments(ctx, bson.M{})
 	if err != nil {
 		log.Printf("Ошибка при подсчете продуктов: %v", err)
@@ -268,7 +312,6 @@ func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set options for Find to include limit and offset for pagination
 	findOptions := options.Find().SetLimit(int64(limit)).SetSkip(int64(offset))
 
 	cursor, err := collection.Find(ctx, bson.M{}, findOptions)
@@ -300,7 +343,6 @@ func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return products along with total count for pagination on client side
 	response := map[string]interface{}{
 		"total":    total,
 		"products": products,
@@ -315,12 +357,8 @@ func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-// GetProductByIDHandler обрабатывает запросы на получение продукта по ID
 func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	// Extract product ID from the URL path using mux.Vars
 	vars := mux.Vars(r)
 	productID, ok := vars["id"]
 	if !ok {
@@ -338,7 +376,6 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Convert the product ID from string to primitive.ObjectID
 	objID, err := primitive.ObjectIDFromHex(productID)
 	if err != nil {
 		log.Printf("Неверный формат ID продукта: %v", err)
@@ -346,7 +383,6 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Query to find the product with the matching ID
 	var product models.Product
 	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&product)
 	if err != nil {
@@ -355,10 +391,50 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Encode the product as JSON and write it to the response
 	if err := json.NewEncoder(w).Encode(product); err != nil {
 		log.Printf("Ошибка при кодировании продукта: %v", err)
 		http.Error(w, "Ошибка при кодировании продукта", http.StatusInternalServerError)
+		return
+	}
+}
+
+func GetMeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		http.Error(w, "Не удалось получить email пользователя из токена", http.StatusInternalServerError)
+		return
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "Sport_Store"
+	}
+
+	collection := utils.DB.Database(dbName).Collection("users")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var user models.User
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			http.Error(w, "Пользователь не найден", http.StatusNotFound)
+		} else {
+			log.Printf("Ошибка при получении пользователя: %v", err)
+			http.Error(w, "Ошибка при получении данных пользователя", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Не возвращаем пароль
+	user.Password = ""
+
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		log.Printf("Ошибка при кодировании пользователя в JSON: %v", err)
+		http.Error(w, "Ошибка при кодировании пользователя в JSON", http.StatusInternalServerError)
 		return
 	}
 }

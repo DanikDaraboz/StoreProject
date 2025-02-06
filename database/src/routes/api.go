@@ -7,21 +7,22 @@ import (
 )
 
 func SetupRoutes(router *mux.Router) {
-	// Public routes
 	router.HandleFunc("/api/users/register", handlers.RegisterHandler).Methods("POST")
 	router.HandleFunc("/api/users/login", handlers.LoginHandler).Methods("POST")
 
-	// Middleware для логирования (apply to all routes)
 	router.Use(middlewares.LoggingMiddleware)
 
-	// Protected routes - require authentication
+	router.HandleFunc("/api/products", handlers.GetProductsHandler).Methods("GET")
+	router.HandleFunc("/api/products/{id}", handlers.GetProductByIDHandler).Methods("GET")
+	router.HandleFunc("/api/categories", handlers.GetCategoriesHandler).Methods("GET")
+
 	api := router.PathPrefix("/api").Subrouter()
-	api.Use(middlewares.AuthMiddleware) // Apply authentication middlewares
+	api.Use(middlewares.AuthMiddleware)
 
 	api.HandleFunc("/users", handlers.GetUsersHandler).Methods("GET")
-	api.HandleFunc("/products", handlers.GetProductsHandler).Methods("GET")
-	api.HandleFunc("/products/{id}", handlers.GetProductByIDHandler).Methods("GET")
-	api.HandleFunc("/categories", handlers.GetCategoriesHandler).Methods("GET")
+	api.HandleFunc("/users/me", handlers.GetMeHandler).Methods("GET")
 
-	// Дополнительные маршруты (см. ниже)
+	admin := api.PathPrefix("").Subrouter()
+	admin.Use(middlewares.AdminMiddleware)
+	admin.HandleFunc("/products", handlers.CreateProductHandler).Methods("POST")
 }
