@@ -10,7 +10,7 @@ func NewRouter() *mux.Router {
 	// TODO middleware
 
 	RegisterProductRoutes(router)
-
+	RegisterOrderRoutes(router)
 	RegisterHealthRoutes(router)
 
 	return router

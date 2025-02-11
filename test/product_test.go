@@ -22,16 +22,16 @@ func TestMain(m *testing.M) {
 	mongoURI := "mongodb://localhost:27017"
 	mongo.Connect(mongoURI)
 
-	// Init routes 
+	// Init routes
 	router = mux.NewRouter()
 	routes.RegisterProductRoutes(router)
+	routes.RegisterOrderRoutes(router)
 
 	// Run all tests
 	exitCode := m.Run()
 
 	// Cleanup
 	mongo.Client.Disconnect(context.Background())
-
 	os.Exit(exitCode)
 }
 
@@ -78,7 +78,7 @@ func TestProductRoutes(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/products/1234567890abcdef12345678", nil)
 		response := executeRequest(req)
 
-		checkStatus(t, http.StatusNotFound, response.Code) 
+		checkStatus(t, http.StatusNotFound, response.Code)
 	})
 
 	t.Run("PUT /products/{id} - Should update a product", func(t *testing.T) {
