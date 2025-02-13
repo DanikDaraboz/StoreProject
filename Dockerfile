@@ -8,7 +8,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 # 4. Cache dependencies
-RUN go mod Download
+RUN go mod download
 
 # 5. Copy the entire project into the container
 COPY . .
