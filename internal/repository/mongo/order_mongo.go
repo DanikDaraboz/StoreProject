@@ -6,11 +6,23 @@ import (
 	"time"
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
+	"github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+// `orderRepository` implements `OrderRepositoryInterface`
+var _ interfaces.OrderRepositoryInterface = (*orderRepository)(nil)
 
-func GetOrders() ([]models.Order, error) {
+type orderRepository struct {
+	collection *mongo.Collection
+}
+
+func NewOrderRepository(collection *mongo.Collection) interfaces.OrderRepositoryInterface {
+	return &orderRepository{collection: collection}
+}
+
+func (o *orderRepository) GetOrders() ([]models.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -30,7 +42,7 @@ func GetOrders() ([]models.Order, error) {
 	return orders, nil
 }
 
-func FetchOrderByID(id string) (models.Order, error) {
+func (o *orderRepository) FetchOrderByID(id string) (models.Order, error) {
 	var order models.Order
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -41,7 +53,7 @@ func FetchOrderByID(id string) (models.Order, error) {
 	return order, err
 }
 
-func InsertOrder(order models.Order) (primitive.ObjectID, error) {
+func (o *orderRepository) InsertOrder(order models.Order) (primitive.ObjectID, error) {
 	order.ID = primitive.NewObjectID()
 	order.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	order.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
@@ -62,7 +74,7 @@ func InsertOrder(order models.Order) (primitive.ObjectID, error) {
 	return insertedID, nil
 }
 
-func UpdateOrder(id string, order models.Order) error {
+func (o *orderRepository) UpdateOrder(id string, order models.Order) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -78,7 +90,7 @@ func UpdateOrder(id string, order models.Order) error {
 	return err
 }
 
-func RemoveOrder(id string) error {
+func (o *orderRepository) RemoveOrder(id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err

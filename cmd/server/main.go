@@ -9,25 +9,44 @@ import (
 	"time"
 
 	"github.com/DanikDaraboz/StoreProject/config"
+	"github.com/DanikDaraboz/StoreProject/internal/handlers"
+	"github.com/DanikDaraboz/StoreProject/internal/repository"
 	"github.com/DanikDaraboz/StoreProject/internal/repository/mongo"
 	"github.com/DanikDaraboz/StoreProject/internal/routes"
+	"github.com/DanikDaraboz/StoreProject/internal/services"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Load configuration
 	cfg := config.LoadConfig()
 
-	// Connect to MongoDB
-	mongo.Connect(cfg.MongoURI)
+	router := mux.NewRouter()
 
-	// Init router
-	mux := routes.NewRouter()
+	mongoClient, err := mongo.Connect(cfg.MongoURI)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to connect to mongo:", err)
+	}
 
-	// Start the server
+	db := mongoClient.Database("ecommerce")
+	repos := repository.NewRepositories(db)
+	services := services.NewServices(repos)
+
+	templateCache, err := handlers.NewTemplateCache()
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to load templates:", err)
+		os.Exit(1)
+	}
+
+	srv := handlers.NewServer(router, mongoClient, services, templateCache)
+
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/static/"))))
+
+	routes.RegisterRoutes(srv)
+
 	server := &http.Server{
 		Addr:    ":" + cfg.ServerPort,
-		Handler: mux, // TODO mux
+		Handler: srv.Router,
 	}
 
 	// Graceful shutdown

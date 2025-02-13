@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
-	"github.com/DanikDaraboz/StoreProject/internal/services"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"github.com/gorilla/mux"
 )
 
-func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
-	orders, err := services.FindAllOrders()
+func (s *Server) GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
+	orders, err := s.Services.OrderServices.FindAllOrders()
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to fetch orders:", err)
 		http.Error(w, "Failed to fetch orders", http.StatusInternalServerError)
@@ -23,11 +22,11 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(orders)
 }
 
-func GetOrderByIDHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetOrderByIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	orderID := vars["id"]
 
-	order, err := services.GetOrderByID(orderID)
+	order, err := s.Services.OrderServices.GetOrderByID(orderID)
 	if err != nil {
 		http.Error(w, "Order not found", http.StatusNotFound)
 		return
@@ -38,7 +37,7 @@ func GetOrderByIDHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(order)
 }
 
-func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	var order models.Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
 		logger.ErrorLogger.Println("Failed to decode order:", err)
@@ -46,7 +45,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	insertedID, err := services.CreateOrder(order)
+	insertedID, err := s.Services.OrderServices.CreateOrder(order)
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to create order:", err)
 		http.Error(w, "Failed to create order", http.StatusInternalServerError)
@@ -63,7 +62,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(order)
 }
 
-func UpdateOrderHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) UpdateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	orderID := vars["id"]
 
@@ -73,7 +72,7 @@ func UpdateOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := services.UpdateOrder(orderID, updatedOrder); err != nil {
+	if err := s.Services.OrderServices.UpdateOrder(orderID, updatedOrder); err != nil {
 		http.Error(w, "Failed to update order", http.StatusInternalServerError)
 		return
 	}
@@ -83,11 +82,11 @@ func UpdateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedOrder)
 }
 
-func DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	orderID := vars["id"]
 
-	if err := services.DeleteOrder(orderID); err != nil {
+	if err := s.Services.OrderServices.DeleteOrder(orderID); err != nil {
 		http.Error(w, "Failed to delete order", http.StatusInternalServerError)
 		return
 	}

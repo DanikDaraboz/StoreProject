@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Information</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles2.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar2">
+            <div class="sign">
+                                <li class="nav-item" id="user-icon-container" style="display:none;">
+                    <a href="/account" id="user-icon" class="user-icon"></a>
+                </li>
+                <a href="/login" class="sign-in-btn" id="sign-in-btn">Sign In</a>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <img id="sun-icon" src="/static/images/sun.png" alt="Sun Icon" class="theme-icon">
+                    <img id="moon-icon" src="/static/images/moon.png" alt="Moon Icon" class="theme-icon2">
+                </button>
+            </div>
+        </nav>
+
+        <nav class="navbar">
+            <div class="logo2">
+                <a href="index.html" class="logo-link">
+                    <img src="/static/images/logo.png" alt="Logo" class="logo">
+                </a>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/h">Home</a></li>
+                <li class="nav-item"><a href="/catalog">Catalog</a></li>
+                <li class="nav-item"><a href="/men">Men</a></li>
+                <li class="nav-item"><a href="/women">Women</a></li>
+                <!-- Иконка пользователя (ссылка на аккаунт) -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="account-container">
+            <h2>Account Information</h2>
+            <div id="user-info">
+                <p><strong>Имя:</strong> <span id="user-name"></span></p>
+                <p><strong>Возраст:</strong> <span id="user-age"></span></p>
+                <p><strong>Телефон:</strong> <span id="user-phone"></span></p>
+                <p><strong>Адрес:</strong> <span id="user-address"></span></p>
+            </div>
+            <div class="account-info">
+                <p><strong>Email:</strong> <span id="user-email"></span></p>
+                <p><strong>First Letter of Email:</strong> <span id="user-initial"></span></p>
+            </div>
+
+            <button id="change-password-btn">Change password</button>
+            <form id="change-password-form">
+                <label for="new-password">New password:</label>
+                <input type="password" id="new-password" required>
+                
+                <label for="confirm-new-password">Confirm password:</label>
+                <input type="password" id="confirm-new-password" required>
+                
+                <button type="submit">Save</button>
+            </form>
+            <button id="add-info-btn">Add Information</button>
+
+            <!-- Форма для добавления информации -->
+            <form id="add-info-form">
+                <label for="name">Имя:</label>
+                <input type="text" id="name" required>
+                
+                <label for="age">Возраст:</label>
+                <input type="number" id="age" required>
+                
+                <label for="phone">Телефон:</label>
+                <input type="tel" id="phone" required>
+                
+                <label for="address">Адрес:</label>
+                <input type="text" id="address" required>
+                
+                <button type="submit">Сохранить информацию</button>
+            </form>
+
+            <button id="logout" class="logout-btn">Logout</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h1>Product</h1>
+                <ul>
+                    <li><a href="/category/football">Football</a></li>
+                    <li><a href="/category/tennis">Tennis</a></li>
+                    <li><a href="/category/basketball">Basketball</a></li>
+                    <li><a href="/category/baseball">Baseball</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h1>Support</h1>
+                <ul>
+                    <li><a href="/help">Help</a></li>
+                    <li><a href="/customer-service">Customer Service</a></li>
+                    <li><a href="/shipping">Shipping</a></li>
+                    <li><a href="/order-tracker">Order Tracker</a></li>
+                    <li><a href="/returns">Returns & Exchanges</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h1>Company Info</h1>
+                <ul>
+                    <li><a href="/about-us">About Us</a></li>
+                    <li><a href="/entity-details">Entity Details</a></li>
+                    <li><a href="/careers">Careers</a></li>
+                    <li><a href="/apps">Company Apps</a></li>
+                </ul>
+            </div>
+        </div>
+        <p>&copy; 2025 Sports Goods Store</p>
+    </footer>
+    <script src="/static/theme-toggle.js"></script>
+    <script src="/static/account.js"></script>
+    <script src="/static/account2.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Загружаем данные из localStorage, если они есть
+            const userName = localStorage.getItem("userName");
+            const userAge = localStorage.getItem("userAge");
+            const userPhone = localStorage.getItem("userPhone");
+            const userAddress = localStorage.getItem("userAddress");
+    
+            // Проверяем, есть ли информация
+            if (userName && userAge && userPhone && userAddress) {
+                // Отображаем информацию на странице
+                document.getElementById("user-name").textContent = userName;
+                document.getElementById("user-age").textContent = userAge;
+                document.getElementById("user-phone").textContent = userPhone;
+                document.getElementById("user-address").textContent = userAddress;
+            } else {
+                // Если данных нет, выводим сообщение
+                document.getElementById("user-info").innerHTML = "<p>Информация не была добавлена.</p>";
+            }
+    
+            // Обработчик отправки формы добавления информации
+            document.getElementById("add-info-form").addEventListener("submit", function(event) {
+                event.preventDefault(); // Предотвращаем перезагрузку страницы при отправке формы
+    
+                // Получаем значения из полей формы
+                const name = document.getElementById("name").value;
+                const age = document.getElementById("age").value;
+                const phone = document.getElementById("phone").value;
+                const address = document.getElementById("address").value;
+    
+                // Проверяем, что все поля заполнены
+                if (name && age && phone && address) {
+                    // Обновляем содержимое на странице
+                    document.getElementById("user-name").textContent = name;
+                    document.getElementById("user-age").textContent = age;
+                    document.getElementById("user-phone").textContent = phone;
+                    document.getElementById("user-address").textContent = address;
+    
+                    // Сохраняем данные в localStorage
+                    localStorage.setItem("userName", name);
+                    localStorage.setItem("userAge", age);
+                    localStorage.setItem("userPhone", phone);
+                    localStorage.setItem("userAddress", address);
+    
+                    // Очищаем форму
+                    document.getElementById("add-info-form").reset();
+                } else {
+                    alert("Пожалуйста, заполните все поля!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

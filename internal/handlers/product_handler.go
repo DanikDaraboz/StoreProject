@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
-	"github.com/DanikDaraboz/StoreProject/internal/services"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"github.com/gorilla/mux"
 )
 
-func GetProducts(w http.ResponseWriter, r *http.Request) {
-	products, err := services.GetAllProducts()
+func (s *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
+	products, err := s.Services.ProductServices.GetAllProducts()
 	if err != nil {
 		logger.ErrorLogger.Println("Error fetching products:", err)
 		http.Error(w, "Failed to fetch products", http.StatusInternalServerError)
@@ -24,11 +23,11 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(products)
 }
 
-func GetProductByID(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetProductByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productID := vars["id"]
 
-	product, err := services.GetProductByID(productID)
+	product, err := s.Services.ProductServices.GetProductByID(productID)
 	if err != nil {
 		http.Error(w, "Product not found", http.StatusNotFound)
 		return
@@ -36,18 +35,18 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	
+
 	json.NewEncoder(w).Encode(product)
 }
 
-func CreateProduct(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
 	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if err := services.CreateProduct(product); err != nil {
+	if err := s.Services.ProductServices.CreateProduct(product); err != nil {
 		http.Error(w, "Failed to create product", http.StatusInternalServerError)
 		return
 	}
@@ -57,7 +56,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(product)
 }
 
-func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+func (s *Server) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productID := vars["id"]
 
@@ -67,7 +66,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := services.UpdateProduct(productID, updatedProduct); err != nil {
+	if err := s.Services.ProductServices.UpdateProduct(productID, updatedProduct); err != nil {
 		http.Error(w, "Failed to update product", http.StatusInternalServerError)
 		return
 	}
@@ -77,11 +76,11 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedProduct)
 }
 
-func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productID := vars["id"]
 
-	if err := services.DeleteProduct(productID); err != nil {
+	if err := s.Services.ProductServices.DeleteProduct(productID); err != nil {
 		http.Error(w, "Failed to delete product", http.StatusInternalServerError)
 		return
 	}

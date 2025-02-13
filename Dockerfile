@@ -17,7 +17,7 @@ COPY . .
 RUN go build -o app ./cmd/server
 
 # 7. Expose the port that your Go app runs on
-EXPOSE 8080
+EXPOSE 3000
 
 # 8. Run the application
 CMD ["./app"]

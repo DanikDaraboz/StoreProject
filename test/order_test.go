@@ -73,7 +73,6 @@ func TestUpdateOrder(t *testing.T) {
 	}
 }
 
-
 func TestGetDeletedOrder(t *testing.T) {
 	t.Logf("Checking if deleted order (%s) still exists...", createdOrder.ID.Hex())
 

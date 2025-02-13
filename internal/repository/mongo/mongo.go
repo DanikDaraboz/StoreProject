@@ -22,7 +22,7 @@ func PingMongoDB() error {
 	return Client.Ping(ctx, nil)
 }
 
-func Connect(mongoURI string) {
+func Connect(mongoURI string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -30,13 +30,13 @@ func Connect(mongoURI string) {
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to create MongoDB client:", err)
-		return
+		return nil, err 
 	}
 
 	err = client.Connect(ctx)
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to connect to MongoDB:", err)
-		return
+		return nil, err 
 	}
 
 	logger.InfoLogger.Println("Connected to MongoDB at", mongoURI)
@@ -44,4 +44,6 @@ func Connect(mongoURI string) {
 	Client = client
 	productCollection = Client.Database("ecommerce").Collection("products")
 	orderCollection = Client.Database("ecommerce").Collection("orders")
+
+	return client, nil 
 }
