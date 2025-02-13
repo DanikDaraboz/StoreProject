@@ -11,47 +11,42 @@ import (
 
 	"github.com/DanikDaraboz/StoreProject/internal/handlers"
 	"github.com/DanikDaraboz/StoreProject/internal/models"
+	"github.com/DanikDaraboz/StoreProject/internal/repository"
 	"github.com/DanikDaraboz/StoreProject/internal/repository/mongo"
 	"github.com/DanikDaraboz/StoreProject/internal/routes"
 	"github.com/DanikDaraboz/StoreProject/internal/services"
+	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"github.com/gorilla/mux"
-	mongoDriver "go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var srv *handlers.Server // Declare global server instance
 
 func TestMain(m *testing.M) {
-	// MongoDB connection setup for tests
-	mongoURI := "mongodb://localhost:27017"
-	clientOptions := options.Client().ApplyURI(mongoURI)
-	mongoClient, err := mongoDriver.Connect(context.Background(), clientOptions)
-	if err != nil {
-		panic("Failed to connect to MongoDB for tests: " + err.Error())
-	}
-
-	// Initialize router
 	router := mux.NewRouter()
 
-	// Initialize test services with mock or real repositories
-	testServices := &services.Services{
-		ProductServices: services.NewProductServices(nil), // Replace nil with a mock repo
-		OrderServices:   services.NewOrderServices(nil),   // Replace nil with a mock repo
+	mongoURI := "mongodb://localhost:27017"
+	mongoClient, err := mongo.Connect(mongoURI)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to connect to mongo:", err)
 	}
 
-	templateCache, err := handlers.NewTemplateCache()
+	// Initialize test repositories and services
+	testDB := mongoClient.Database("ecommerce_test")
+	testRepos := repository.NewRepositories(testDB)
+	testServices := services.NewServices(testRepos)
 
-	// Create a Server instance for testing
+	templateCache, err := handlers.NewTemplateCache()
+	if err != nil {
+		panic("Failed to load templates: " + err.Error())
+	}
+
 	srv = handlers.NewServer(router, mongoClient, testServices, templateCache)
 
-	// Register routes using the new Server instance
 	routes.RegisterRoutes(srv)
 
-	// Run all tests
 	exitCode := m.Run()
 
-	// Cleanup
-	mongo.Client.Disconnect(context.Background())
+	mongoClient.Disconnect(context.Background()) // Corrected client disconnect
 	os.Exit(exitCode)
 }
 
