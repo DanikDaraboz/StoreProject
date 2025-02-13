@@ -7,8 +7,8 @@ WORKDIR /app
 # 3. Copy go.mod and go.sum first (for caching dependencies)
 COPY go.mod go.sum ./
 
-# 4. Download dependencies
-RUN go mod tidy
+# 4. Cache dependencies
+RUN go mod Download
 
 # 5. Copy the entire project into the container
 COPY . .
@@ -17,7 +17,7 @@ COPY . .
 RUN go build -o app ./cmd/server
 
 # 7. Expose the port that your Go app runs on
-EXPOSE 3000
+EXPOSE 8080
 
 # 8. Run the application
 CMD ["./app"]
