@@ -27,9 +27,8 @@ func (p *productRepository) GetProducts() ([]map[string]interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	collection := Client.Database("ecommerce").Collection("products")
 
-	cursor, err := collection.Find(ctx, bson.M{})
+	cursor, err := p.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +49,7 @@ func (p *productRepository) FetchProductByID(id string) (models.Product, error) 
 		return product, err
 	}
 
-	err = productCollection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&product)
+	err = p.collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&product)
 	return product, err
 }
 
@@ -59,7 +58,7 @@ func (p *productRepository) InsertProduct(product models.Product) error {
 	product.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	product.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 
-	_, err := productCollection.InsertOne(context.TODO(), product)
+	_, err := p.collection.InsertOne(context.TODO(), product)
 	return err
 }
 
@@ -71,7 +70,7 @@ func (p *productRepository) UpdateProduct(id string, product models.Product) err
 
 	product.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 
-	_, err = productCollection.UpdateOne(
+	_, err = p.collection.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": objID},
 		bson.M{"$set": product},
@@ -85,6 +84,6 @@ func (p *productRepository) RemoveProduct(id string) error {
 		return err
 	}
 
-	_, err = productCollection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	_, err = p.collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
 	return err
 }

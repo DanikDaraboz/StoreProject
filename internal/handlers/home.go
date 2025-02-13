@@ -12,8 +12,22 @@ func (s *Server) Home(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Home handler reached!")
 	data := templateData{
 		Title: "Home page",
-		
+
 		Products: []models.Product{
+			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
+			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
 			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
 			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
 		},

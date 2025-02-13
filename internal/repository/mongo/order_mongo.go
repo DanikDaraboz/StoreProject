@@ -22,13 +22,12 @@ func NewOrderRepository(collection *mongo.Collection) interfaces.OrderRepository
 	return &orderRepository{collection: collection}
 }
 
+
 func (o *orderRepository) GetOrders() ([]models.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	collection := Client.Database("ecommerce").Collection("orders")
-
-	cursor, err := collection.Find(ctx, bson.M{})
+	cursor, err := o.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +48,7 @@ func (o *orderRepository) FetchOrderByID(id string) (models.Order, error) {
 		return order, err
 	}
 
-	err = orderCollection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&order)
+	err = o.collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&order)
 	return order, err
 }
 
@@ -61,7 +60,7 @@ func (o *orderRepository) InsertOrder(order models.Order) (primitive.ObjectID, e
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	result, err := orderCollection.InsertOne(ctx, order)
+	result, err := o.collection.InsertOne(ctx, order)
 	if err != nil {
 		return primitive.NilObjectID, err
 	}
@@ -82,7 +81,7 @@ func (o *orderRepository) UpdateOrder(id string, order models.Order) error {
 
 	order.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 
-	_, err = orderCollection.UpdateOne(
+	_, err = o.collection.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": objID},
 		bson.M{"$set": order},
@@ -95,7 +94,6 @@ func (o *orderRepository) RemoveOrder(id string) error {
 	if err != nil {
 		return err
 	}
-
-	_, err = orderCollection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	_, err = o.collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
 	return err
 }

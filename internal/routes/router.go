@@ -25,7 +25,13 @@ func RegisterRoutes(s *handlers.Server) {
 	s.Router.HandleFunc("/orders/{id}", s.UpdateOrderHandler).Methods("PUT")    // Update order
 	s.Router.HandleFunc("/orders/{id}", s.DeleteOrderHandler).Methods("DELETE") // Delete order
 
-	s.Router.HandleFunc("/health", handlers.HealthCheckHandler).Methods("GET")
+	// auth
+	// account
+
+	// wishlist
+	// cart
+	
+	s.Router.HandleFunc("/health", s.HealthCheckHandler).Methods("GET")
 
 	fmt.Println("Registered routes:")
 	s.Router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
