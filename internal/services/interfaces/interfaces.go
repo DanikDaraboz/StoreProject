@@ -26,14 +26,14 @@ type CartServicesInterface interface {
 	GetCartItems(userID string) ([]models.CartItem, error)
 	RemoveItemFromCart(userID string, itemID string) error
 	ClearCart(userID string) error	
-	UpdateCartItem(userID string, itemID string, quantity int) error
+	UpdateCart(cart models.Cart) error
 }
 
 type UserServicesInterface interface {
 	RegisterUser(user models.User) (primitive.ObjectID, error)
 	LoginUser(email string, password string) (string, error) // Returns session key
 	LogoutUser(sessionKey string) error
-	GetUserByID(id string) (models.User, error)
-	UpdateUser(id string, user models.User) error
-	ValidateSession(sessionKey string) (models.User, error)
+	GetUser(id string) (models.User, error)
+	UpdateUser(user models.User) error
+	ManageSession(userID string, sessionKey string, action string) error
 }
