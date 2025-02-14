@@ -11,6 +11,7 @@ type Repositories struct {
 	OrderRepo   interfaces.OrderRepositoryInterface
 	CartRepo    interfaces.CartRepositoryInterface
 	UserRepo    interfaces.UserRepositoryInterface
+	SessionRepo interfaces.SessionRepositoryInterface
 }
 
 func NewRepositories(db *mongodriver.Database) *Repositories {
@@ -19,5 +20,6 @@ func NewRepositories(db *mongodriver.Database) *Repositories {
 		OrderRepo:   mongo.NewOrderRepository(db.Collection("orders")),
 		CartRepo:    mongo.NewCartRepository(db.Collection("carts")),
 		UserRepo:    mongo.NewUserRepository(db.Collection("users")),
+		SessionRepo: mongo.NewSessionRepository(db.Collection("sessions")),
 	}
 }

@@ -1,6 +1,8 @@
 package interfaces
 
 import (
+	"time"
+
 	"github.com/DanikDaraboz/StoreProject/internal/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -25,9 +27,7 @@ type CartRepositoryInterface interface {
 	InsertCart(cart models.Cart) error
 	FindCartByUserID(userID primitive.ObjectID) (models.Cart, error)
 	UpdateCart(cart models.Cart) error
-	ClearCart(cart models.Cart) error
 }
-
 
 type UserRepositoryInterface interface {
 	InsertUser(user models.User) (primitive.ObjectID, error)
@@ -37,3 +37,9 @@ type UserRepositoryInterface interface {
 	ManageSession(userID primitive.ObjectID, sessionKey string, action string) error
 }
 
+type SessionRepositoryInterface interface {
+	InsertSession(sessionID string, userID string, expiresAt time.Time) error
+	FindSessionByID(sessionID string) (models.Session, error)
+	DeleteSessionByID(sessionID string) error
+	DeleteExpiredSessions() error
+}

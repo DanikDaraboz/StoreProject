@@ -25,7 +25,7 @@ type CartServicesInterface interface {
 	AddItemToCart(userID string, item models.CartItem) error
 	GetCartItems(userID string) ([]models.CartItem, error)
 	RemoveItemFromCart(userID string, itemID string) error
-	ClearCart(userID string) error	
+	ClearCart(userID string) error
 	UpdateCart(cart models.Cart) error
 }
 
@@ -36,4 +36,11 @@ type UserServicesInterface interface {
 	GetUser(id string) (models.User, error)
 	UpdateUser(user models.User) error
 	ManageSession(userID string, sessionKey string, action string) error
+}
+
+type SessionServicesInterface interface {
+	CreateSession(userID string) (string, error)
+	FindSession(sessionID string) (string, error)
+	DeleteSession(sessionID string) error
+	ClearExpiredSessions() error
 }

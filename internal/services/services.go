@@ -8,15 +8,17 @@ import (
 type Services struct {
 	ProductServices interfaces.ProductServicesInterface
 	OrderServices   interfaces.OrderServicesInterface
-	CartServices	interfaces.CartServicesInterface
-	UserServices 	interfaces.UserServicesInterface
+	CartServices    interfaces.CartServicesInterface
+	UserServices    interfaces.UserServicesInterface
+	SessionServices interfaces.SessionServicesInterface
 }
 
 func NewServices(repos *repository.Repositories) *Services {
 	return &Services{
 		ProductServices: NewProductServices(repos.ProductRepo),
 		OrderServices:   NewOrderServices(repos.OrderRepo),
-		CartServices: NewCartServices(repos.CartRepo),
-		UserServices: NewUserServices(repos.UserRepo),
+		CartServices:    NewCartServices(repos.CartRepo),
+		UserServices:    NewUserServices(repos.UserRepo),
+		SessionServices: NewSessionServices(repos.SessionRepo),
 	}
 }
