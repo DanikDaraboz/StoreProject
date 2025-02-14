@@ -6,6 +6,13 @@ import (
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 )
 
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -33,14 +40,6 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 				logger.WarnLogger.Printf("Panic recovered: %v", err)
 			}
 		}()
-		next.ServeHTTP(w, r)
-	})
-}
-
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO validate session 
-
 		next.ServeHTTP(w, r)
 	})
 }

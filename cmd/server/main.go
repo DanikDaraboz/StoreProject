@@ -49,6 +49,19 @@ func main() {
 		Handler: srv.Router,
 	}
 
+	// Clear expired sessions from DB
+	go func() {
+		ticker := time.NewTicker(10 * time.Minute)
+		for range ticker.C {
+			err := srv.Services.SessionServices.ClearExpiredSessions()
+			if err != nil {
+				logger.WarnLogger.Println("Failed to clear expired sessions:", err)
+			} else {
+				logger.InfoLogger.Println("Expired sessions cleared successfully")
+			}
+		}
+	}()
+
 	// Graceful shutdown
 	go func() {
 		logger.InfoLogger.Println("Server running on port", cfg.ServerPort)
