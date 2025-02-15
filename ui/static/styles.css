@@ -21,7 +21,7 @@ body.dark-theme {
     --button-background: #4CAF50;
     --button-hover-background: #45a049;
     --link-color: #4CAF50;
-    --product-card-background: #444;
+    --product-card-background: #353535;
     --product-card-shadow: rgba(0, 0, 0, 0.3);
 }
 
@@ -67,16 +67,29 @@ main {
     flex-wrap: wrap;
     gap: 20px;
 }
-
-/* Styling for each product card */
-.product-card {
+.product-card2 {
     background-color: var(--product-card-background);
-    width: 200px;
+    width: 300px;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px var(--product-card-shadow);
     text-align: center;
     transition: background-color var(--transition-duration), box-shadow var(--transition-duration);
+}
+/* Styling for each product card */
+.product-card {
+    background-color: var(--product-card-background);
+    width: 500px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px var(--product-card-shadow);
+    text-align: center;
+    transition: background-color var(--transition-duration), box-shadow var(--transition-duration);
+}
+.product-card2 h2 {
+    font-size: 23px;
+    color: var(--text-color);
+    margin-top: 10px;
 }
 
 .product-image {
@@ -86,7 +99,7 @@ main {
 }
 
 .product-card h2 {
-    font-size: 18px;
+    font-size: 23px;
     color: var(--text-color);
     margin-top: 10px;
 }
@@ -119,7 +132,7 @@ main {
 }
 
 .product-detail-image {
-    width: 300px;
+    width: 650px;
     height: auto;
     border-radius: 8px;
 }
@@ -194,6 +207,7 @@ button:hover, .go-back-button:hover {
 }
 
 .nav-list {
+    list-style: none;
     display: flex;
     align-items: center;
 }
@@ -220,7 +234,7 @@ button:hover, .go-back-button:hover {
     bottom: 0px;
     left: 0;
     width: 100%;
-    height: 3px; /* Высота полоски */
+    height: 2px; /* Высота полоски */
     background-color: black;
 }
 .dark-theme .nav-item a.active::after{
@@ -248,7 +262,7 @@ button:hover, .go-back-button:hover {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 3px; /* Высота полоски */
+    height: 2px; /* Высота полоски */
     background-color: black;
 }
 .dark-theme #catalog-text.active::after{
@@ -503,14 +517,14 @@ body.dark-theme .category-menu li:hover {
     width:90%;
 }
 #car{
-    height:580px;
+    height:40%;
 }
 .par{
     display: flex;
     justify-content: center;
 }
 #car2{
-    height:580px;
+    height:100%;
     width: 100%;
     transition: transform 0.3s ease-in-out;
 }
@@ -612,3 +626,121 @@ body.dark-theme .category-menu li:hover {
     
 }
 
+.favorites-icon{
+    width: 25px;
+    height: auto;
+    position: absolute;
+    margin-left: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.favorites-icon.favorited {
+    filter: brightness(0.6) sepia(1) hue-rotate(330deg) saturate(5); /* Красный оттенок */
+    transform: scale(1.2);
+}
+.dark-theme .favorites-icon.favorited {
+    filter: brightness(0.6) sepia(1) hue-rotate(330deg) saturate(5); /* Красный оттенок */
+    transform: scale(1.2);
+}
+.dark-theme .favorites-icon{
+    filter: invert(1);
+}
+.dark-theme .theme-icon2{
+    filter: invert(1);
+}
+#favorites3{
+    width: 30px;
+    height: auto;
+}
+.dark-theme #favorites3{
+    filter: invert(1);
+}
+.quantity{
+    width: 25px;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin: 15px;
+}
+.dark-theme .quantity{
+    filter: invert(1);
+}
+.buy2{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+
+.asd{
+    display: flex;
+    justify-content: center;
+}
+.payment-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    text-align: center;
+}
+
+.payment-title {
+    margin-bottom: 20px;
+}
+
+.payment-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.card-details {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-details .input-group {
+    width: 48%;
+}
+.change-quantity{
+    background-color: white;
+}
+.change-quantity:hover{
+    background-color: white;
+}
+.dark-theme .change-quantity{
+    background-color: #353535;
+}
+.dark-theme .change-quantity:hover{
+    background-color: #353535;
+}
+.dfg{
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+}
+.dark-theme .dfg{
+    color: white;
+}
+.hjk{
+    text-decoration: none;
+}
