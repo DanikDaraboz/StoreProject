@@ -12,6 +12,7 @@
     <header>
         <nav class="navbar2">
             <div class="sign">
+                    <a href="/user" id="user-icon" class="user-icon"></a>
                     <a href="/login" class="sign-in-btn">Sign In</a>
                         <button class="theme-toggle" onclick="toggleTheme()">
                             <img id="sun-icon" src="/static/images/sun.png" alt="Sun Icon" class="theme-icon">
@@ -35,9 +36,9 @@
                     <div class="category-menu">
                         <ul>
                             <li data-category="all"><a href="/all">All products</a></li>
-                            {{range .Categories}}
+                            <!-- {{range .Categories}}
                                 <li><a href="/category/{{.}}">{{.}}</a></li>
-                            {{end}}
+                            {{end}} -->
                         </ul>
                     </div>
                 </div></li>

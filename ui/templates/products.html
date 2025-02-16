@@ -12,6 +12,7 @@
     <header>
         <nav class="navbar2">
             <div class="sign">
+                    <a href="/user" id="user-icon" class="user-icon"></a>
                     <a href="/login" class="sign-in-btn">Sign In</a>
                         <button class="theme-toggle" onclick="toggleTheme()">
                             <img id="sun-icon" src="/static/images/sun.png" alt="Sun Icon" class="theme-icon">
@@ -35,9 +36,9 @@
                     <div class="category-menu">
                         <ul>
                             <li data-category="all"><a href="/all">All products</a></li>
-                            {{range .Categories}}
+                            <!-- {{range .Categories}}
                                 <li><a href="/category/{{.}}">{{.}}</a></li>
-                            {{end}}
+                            {{end}} -->
                         </ul>
                     </div>
                 </div></li>
@@ -53,7 +54,9 @@
     <div class="product-list">
         {{range .Products}}
             <div class="product-card">
-                <img src="{{.Image}}" alt="{{.Name}}" class="product-image">
+                {{range.Images}}
+                    <img src="{{.}}" alt="{{.Name}}" class="product-image" />
+                {{end}}
                 <h2>{{.Name}}</h2>
                 <p class="product-price">${{.Price}}</p>
                 <a href="/product?id={{.ID}}" class="view-details">View Details</a>
@@ -104,6 +107,6 @@
     <script src="/static/theme-toggle.js"></script>
     <script src="/static/active.js"></script>
     <script src="/static/catalog.js"></script>
-    <script src="/static/account.js"></script>
+    <script src="/static/user.js"></script>
 </body>
 </html>

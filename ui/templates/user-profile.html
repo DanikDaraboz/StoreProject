@@ -42,14 +42,13 @@
         <div class="account-container">
             <h2>Account Information</h2>
             <div id="user-info">
-                <p><strong>Имя:</strong> <span id="user-name"></span></p>
-                <p><strong>Возраст:</strong> <span id="user-age"></span></p>
-                <p><strong>Телефон:</strong> <span id="user-phone"></span></p>
-                <p><strong>Адрес:</strong> <span id="user-address"></span></p>
+                <p><strong>Name:</strong> <span id="user-name"></span></p>
+                <p><strong>Age:</strong> <span id="user-age"></span></p>
+                <p><strong>Phone number:</strong> <span id="user-phone"></span></p>
+                <p><strong>Address:</strong> <span id="user-address"></span></p>
             </div>
             <div class="account-info">
                 <p><strong>Email:</strong> <span id="user-email"></span></p>
-                <p><strong>First Letter of Email:</strong> <span id="user-initial"></span></p>
             </div>
 
             <button id="change-password-btn">Change password</button>
@@ -66,19 +65,19 @@
 
             <!-- Форма для добавления информации -->
             <form id="add-info-form">
-                <label for="name">Имя:</label>
+                <label for="name">Name:</label>
                 <input type="text" id="name" required>
                 
-                <label for="age">Возраст:</label>
+                <label for="age">Age:</label>
                 <input type="number" id="age" required>
                 
-                <label for="phone">Телефон:</label>
+                <label for="phone">Phone number:</label>
                 <input type="tel" id="phone" required>
                 
-                <label for="address">Адрес:</label>
+                <label for="address">Address:</label>
                 <input type="text" id="address" required>
                 
-                <button type="submit">Сохранить информацию</button>
+                <button type="submit">Save information</button>
             </form>
 
             <button id="logout" class="logout-btn">Logout</button>
@@ -119,59 +118,6 @@
         <p>&copy; 2025 Sports Goods Store</p>
     </footer>
     <script src="/static/theme-toggle.js"></script>
-    <script src="/static/account.js"></script>
-    <script src="/static/account2.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Загружаем данные из localStorage, если они есть
-            const userName = localStorage.getItem("userName");
-            const userAge = localStorage.getItem("userAge");
-            const userPhone = localStorage.getItem("userPhone");
-            const userAddress = localStorage.getItem("userAddress");
-    
-            // Проверяем, есть ли информация
-            if (userName && userAge && userPhone && userAddress) {
-                // Отображаем информацию на странице
-                document.getElementById("user-name").textContent = userName;
-                document.getElementById("user-age").textContent = userAge;
-                document.getElementById("user-phone").textContent = userPhone;
-                document.getElementById("user-address").textContent = userAddress;
-            } else {
-                // Если данных нет, выводим сообщение
-                document.getElementById("user-info").innerHTML = "<p>Информация не была добавлена.</p>";
-            }
-    
-            // Обработчик отправки формы добавления информации
-            document.getElementById("add-info-form").addEventListener("submit", function(event) {
-                event.preventDefault(); // Предотвращаем перезагрузку страницы при отправке формы
-    
-                // Получаем значения из полей формы
-                const name = document.getElementById("name").value;
-                const age = document.getElementById("age").value;
-                const phone = document.getElementById("phone").value;
-                const address = document.getElementById("address").value;
-    
-                // Проверяем, что все поля заполнены
-                if (name && age && phone && address) {
-                    // Обновляем содержимое на странице
-                    document.getElementById("user-name").textContent = name;
-                    document.getElementById("user-age").textContent = age;
-                    document.getElementById("user-phone").textContent = phone;
-                    document.getElementById("user-address").textContent = address;
-    
-                    // Сохраняем данные в localStorage
-                    localStorage.setItem("userName", name);
-                    localStorage.setItem("userAge", age);
-                    localStorage.setItem("userPhone", phone);
-                    localStorage.setItem("userAddress", address);
-    
-                    // Очищаем форму
-                    document.getElementById("add-info-form").reset();
-                } else {
-                    alert("Пожалуйста, заполните все поля!");
-                }
-            });
-        });
-    </script>
+    <script src="/static/user.js"></script>
 </body>
 </html>
