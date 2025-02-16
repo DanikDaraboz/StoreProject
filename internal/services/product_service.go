@@ -7,6 +7,7 @@ import (
 	repoInterface "github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
 	"github.com/DanikDaraboz/StoreProject/internal/services/interfaces"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var _ interfaces.ProductServicesInterface = (*productService)(nil)
@@ -19,33 +20,111 @@ func NewProductServices(productRepo repoInterface.ProductRepositoryInterface) in
 	return &productService{productRepo: productRepo}
 }
 
-func (p productService) GetAllProducts() ([]map[string]interface{}, error) {
+func (p productService) GetAllProducts() ([]models.Product, error) {
 	products, err := p.productRepo.GetProducts()
 	if err != nil {
 		logger.ErrorLogger.Println("Error fetching products:", err)
 		return nil, err
 	}
+	// TODO
+	// allow users to filter by category, price range, or availability
+	// pagination parameters like limit, offset, or page
+	// product.Images ensure they are valid URLs
+	// validating product.Category with predefined categories
 
-	// TODO filtering
+	// safe stock updates to prevent race conditions! 	add (Version  int `json:"version"`)
 
 	return products, nil
 }
 
 func (p productService) GetProductByID(id string) (models.Product, error) {
+	if id == "" {
+		return models.Product{}, errors.New("product ID cannot be empty")
+	}
+
 	return p.productRepo.FetchProductByID(id)
 }
 
 func (p productService) CreateProduct(product models.Product) error {
-	if product.Name == "" || product.Price <= 0 {
-		return errors.New("invalid product data")
+	if err := validateProduct(product); err != nil {
+		logger.ErrorLogger.Println("Product validation failed:", err)
+		return err
 	}
+
 	return p.productRepo.InsertProduct(product)
 }
 
 func (p productService) UpdateProduct(id string, product models.Product) error {
+	if id == "" {
+		return errors.New("product ID cannot be empty")
+	}
+
+	if err := validateProduct(product); err != nil {
+		return err
+	}
+
+	// check if exist before updating
+	existingProduct, err := p.productRepo.FetchProductByID(id)
+	if err != nil {
+		return err
+	}
+
+	if !isProductChanged(existingProduct, product) {
+		logger.InfoLogger.Printf("No changes detected for product ID: %s", id)
+		return nil
+	}
+
 	return p.productRepo.UpdateProduct(id, product)
 }
 
 func (p productService) DeleteProduct(id string) error {
+	if id == "" {
+		return errors.New("product ID cannot be empty")
+	}
+
+	_, err := p.productRepo.FetchProductByID(id)
+	if err == mongo.ErrNoDocuments {
+		return errors.New("product not found, cannot delete")
+	}
+	if err != nil {
+		return err
+	}
+
 	return p.productRepo.RemoveProduct(id)
+}
+
+func validateProduct(product models.Product) error {
+	if product.Name == "" {
+		return errors.New("product name is required")
+	}
+	if product.Price <= 0 {
+		return errors.New("product price must be greater than zero")
+	}
+	if product.Stock < 0 {
+		return errors.New("product stock cannot be negative")
+	}
+	if len(product.Category) == 0 {
+		return errors.New("product category is required")
+	}
+	return nil
+}
+
+func isProductChanged(old, new models.Product) bool {
+	if old.Name != new.Name ||
+		old.Price != new.Price ||
+		old.Stock != new.Stock ||
+		old.Category != new.Category {
+		return true
+	}
+
+	if len(old.Images) != len(new.Images) {
+		return true
+	}
+	for i := range old.Images {
+		if old.Images[i] != new.Images[i] {
+			return true
+		}
+	}
+
+	return false
 }

@@ -11,6 +11,7 @@ type Services struct {
 	CartServices    interfaces.CartServicesInterface
 	UserServices    interfaces.UserServicesInterface
 	SessionServices interfaces.SessionServicesInterface
+	CategoryService interfaces.CategoryServicesInterface
 }
 
 func NewServices(repos *repository.Repositories) *Services {
@@ -20,5 +21,6 @@ func NewServices(repos *repository.Repositories) *Services {
 		CartServices:    NewCartServices(repos.CartRepo),
 		UserServices:    NewUserServices(repos.UserRepo),
 		SessionServices: NewSessionServices(repos.SessionRepo),
+		CategoryService: NewCategoryService(repos.CategoryRepo),
 	}
 }

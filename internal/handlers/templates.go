@@ -11,11 +11,18 @@ import (
 	"github.com/DanikDaraboz/StoreProject/ui"
 )
 
-type templateData struct {
-	Title string
-	Products []models.Product
-	Order   *models.Order
-	
+type TemplateData struct {
+	Title      string
+	User       *models.User
+	Users      *models.User
+	Product    *models.Product
+	Products   *[]models.Product
+	Cart       *models.Cart
+	CartItem   *models.CartItem
+	Order      *models.Order
+	Orders     *[]models.Order
+	Category   *models.Category
+	Categories *[]models.Category
 }
 
 func NewTemplateCache() (map[string]*template.Template, error) {
@@ -36,7 +43,6 @@ func NewTemplateCache() (map[string]*template.Template, error) {
 
 	return cache, nil
 }
-
 
 func RenderTemplate(w http.ResponseWriter, tmplName string, data interface{}) error {
 	cache, err := NewTemplateCache()

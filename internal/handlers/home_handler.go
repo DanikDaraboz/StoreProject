@@ -2,56 +2,43 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/DanikDaraboz/StoreProject/internal/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 )
 
-func (s *Server) Home(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Home handler reached!")
-	data := templateData{
-		Title: "Home page",
-
-		Products: []models.Product{
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Laptop", Price: 999.99, Images: []string{"static/images/1.jpg"}},
-			{ID: primitive.NewObjectID(), Name: "Smartphone", Price: 699.99, Images: []string{"/static/images/2.jpg"}},
-		},
-	}
-
-	ts, ok := s.TemplatesCache["index.html"]
-	if !ok {
-		fmt.Println("Template not found!")
-		http.Error(w, "The template does not exist", http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Println("Template found. Rendering now...")
-
-	err := ts.Execute(w, data)
+func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
+	// Fetch all products
+	products, err := s.Services.ProductServices.GetAllProducts()
 	if err != nil {
-		fmt.Println("Error rendering template:", err)
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		logger.ErrorLogger.Printf("Failed to fetch products: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Println("Template rendered successfully!")
+	categories, err := s.Services.CategoryService.GetAllCategories()
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to fetch categories: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	data := TemplateData{
+		Title:      "Home page",
+		Products:   &products,
+		Categories: &categories,
+	}
+
+	// Render the cached template
+	ts := s.TemplatesCache["index.html"]
+	if err := ts.Execute(w, data); err != nil {
+		logger.ErrorLogger.Println("Failed to render template:", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	logger.InfoLogger.Println("Home page rendered successfully.")
 }
 
 func (s *Server) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {

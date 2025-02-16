@@ -61,5 +61,8 @@ func (s *Server) DeleteCartItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-
 // ClearCart?
+
+func (s *Server) RenderCartPage(w http.ResponseWriter, r *http.Request) {
+
+}

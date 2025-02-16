@@ -23,10 +23,9 @@ func NewProductRepository(collection *mongo.Collection) interfaces.ProductReposi
 }
 
 // TODO Pagination?
-func (p *productRepository) GetProducts() ([]map[string]interface{}, error) {
+func (p *productRepository) GetProducts() ([]models.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
 
 	cursor, err := p.collection.Find(ctx, bson.M{})
 	if err != nil {
@@ -34,7 +33,7 @@ func (p *productRepository) GetProducts() ([]map[string]interface{}, error) {
 	}
 	defer cursor.Close(ctx)
 
-	var products []map[string]interface{}
+	var products []models.Product
 	if err = cursor.All(ctx, &products); err != nil {
 		return nil, err
 	}
@@ -43,47 +42,54 @@ func (p *productRepository) GetProducts() ([]map[string]interface{}, error) {
 }
 
 func (p *productRepository) FetchProductByID(id string) (models.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	var product models.Product
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return product, err
 	}
 
-	err = p.collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&product)
+	err = p.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&product)
 	return product, err
 }
 
 func (p *productRepository) InsertProduct(product models.Product) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	product.ID = primitive.NewObjectID()
 	product.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	product.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 
-	_, err := p.collection.InsertOne(context.TODO(), product)
+	_, err := p.collection.InsertOne(ctx, product)
 	return err
 }
 
 func (p *productRepository) UpdateProduct(id string, product models.Product) error {
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	product.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 
-	_, err = p.collection.UpdateOne(
-		context.TODO(),
-		bson.M{"_id": objID},
+	_, err := p.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": product.ID},
 		bson.M{"$set": product},
 	)
 	return err
 }
 
 func (p *productRepository) RemoveProduct(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
-	_, err = p.collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	_, err = p.collection.DeleteOne(ctx, bson.M{"_id": objID})
 	return err
 }

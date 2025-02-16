@@ -13,10 +13,11 @@ import (
 	"github.com/DanikDaraboz/StoreProject/internal/routes"
 	"github.com/DanikDaraboz/StoreProject/internal/services"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
+	"github.com/DanikDaraboz/StoreProject/pkg/middleware"
 	"github.com/gorilla/mux"
 )
 
-var srv *handlers.Server 
+var srv *handlers.Server
 
 func TestMain(m *testing.M) {
 	router := mux.NewRouter()
@@ -36,13 +37,15 @@ func TestMain(m *testing.M) {
 		panic("Failed to load templates: " + err.Error())
 	}
 
-	srv = handlers.NewServer(router, mongoClient, testServices, templateCache)
+	middlewareInstance := middleware.NewMiddleware(testServices)
+
+	srv = handlers.NewServer(router, mongoClient, testServices, templateCache, middlewareInstance)
 
 	routes.RegisterRoutes(srv)
 
 	exitCode := m.Run()
 
-	mongoClient.Disconnect(context.Background()) 
+	mongoClient.Disconnect(context.Background())
 	os.Exit(exitCode)
 }
 

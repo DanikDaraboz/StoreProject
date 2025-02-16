@@ -15,6 +15,7 @@ import (
 	"github.com/DanikDaraboz/StoreProject/internal/routes"
 	"github.com/DanikDaraboz/StoreProject/internal/services"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
+	"github.com/DanikDaraboz/StoreProject/pkg/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -38,7 +39,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	srv := handlers.NewServer(router, mongoClient, services, templateCache)
+	middlewareInstance := middleware.NewMiddleware(services)
+
+	srv := handlers.NewServer(router, mongoClient, services, templateCache, middlewareInstance)
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/static/"))))
 

@@ -87,3 +87,11 @@ func (s *Server) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (s *Server) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (s *Server) RenderProductDetailsPage(w http.ResponseWriter, r *http.Request) {
+
+}
