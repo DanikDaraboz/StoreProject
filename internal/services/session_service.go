@@ -1,14 +1,14 @@
 package services
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"time"
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
 	repoInterface "github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
 	"github.com/DanikDaraboz/StoreProject/internal/services/interfaces"
+	"github.com/DanikDaraboz/StoreProject/pkg/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var _ interfaces.SessionServicesInterface = (*sessionServices)(nil)
@@ -21,8 +21,8 @@ func NewSessionServices(sessionRepo repoInterface.SessionRepositoryInterface) in
 	return &sessionServices{sessionRepo: sessionRepo}
 }
 
-func (s sessionServices) CreateSession(userID string) (string, error) {
-	sessionID, err := generateSessionID()
+func (s sessionServices) CreateSession(userID primitive.ObjectID) (string, error) {
+	sessionID, err := utils.GenerateSessionID()
 	if err != nil {
 		return "", err
 	}
@@ -69,13 +69,4 @@ func (s sessionServices) ClearExpiredSessions() error {
 	}
 
 	return nil
-}
-
-// Helper to generate sessionID
-func generateSessionID() (string, error) {
-	bytes := make([]byte, 16)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", errors.New("failed to generate session ID")
-	}
-	return hex.EncodeToString(bytes), nil
 }

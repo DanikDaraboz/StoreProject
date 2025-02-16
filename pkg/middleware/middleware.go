@@ -55,6 +55,7 @@ func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		var user models.User
+		
 		user, err = m.services.UserServices.GetUser(session.UserID)
 		if err != nil {
 			logger.WarnLogger.Println("Couldnt get the user", err)

@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-// `orderRepository` implements `OrderRepositoryInterface`
+
 var _ interfaces.OrderRepositoryInterface = (*orderRepository)(nil)
 
 type orderRepository struct {
@@ -22,11 +22,12 @@ func NewOrderRepository(collection *mongo.Collection) interfaces.OrderRepository
 	return &orderRepository{collection: collection}
 }
 
-
+// TODO cursor.Next() instead of cursor.All()
 func (o *orderRepository) GetOrders() ([]models.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// Query all orders
 	cursor, err := o.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -42,23 +43,26 @@ func (o *orderRepository) GetOrders() ([]models.Order, error) {
 }
 
 func (o *orderRepository) FetchOrderByID(id string) (models.Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	var order models.Order
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return order, err
 	}
 
-	err = o.collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&order)
+	err = o.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&order)
 	return order, err
 }
 
 func (o *orderRepository) InsertOrder(order models.Order) (primitive.ObjectID, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	order.ID = primitive.NewObjectID()
 	order.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	order.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
 	result, err := o.collection.InsertOne(ctx, order)
 	if err != nil {
@@ -74,6 +78,9 @@ func (o *orderRepository) InsertOrder(order models.Order) (primitive.ObjectID, e
 }
 
 func (o *orderRepository) UpdateOrder(id string, order models.Order) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -82,7 +89,7 @@ func (o *orderRepository) UpdateOrder(id string, order models.Order) error {
 	order.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 
 	_, err = o.collection.UpdateOne(
-		context.TODO(),
+		ctx,
 		bson.M{"_id": objID},
 		bson.M{"$set": order},
 	)
@@ -90,10 +97,15 @@ func (o *orderRepository) UpdateOrder(id string, order models.Order) error {
 }
 
 func (o *orderRepository) RemoveOrder(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	_, err = o.collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+
+	_, err = o.collection.DeleteOne(ctx, bson.M{"_id": objID})
+
 	return err
 }

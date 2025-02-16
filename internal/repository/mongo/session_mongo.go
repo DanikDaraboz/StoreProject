@@ -9,6 +9,7 @@ import (
 	"github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -22,7 +23,7 @@ func NewSessionRepository(collection *mongo.Collection) interfaces.SessionReposi
 	return &sessionRepository{collection: collection}
 }
 
-func (s sessionRepository) InsertSession(sessionID string, userID string, expiresAt time.Time) error {
+func (s sessionRepository) InsertSession(sessionID string, userID primitive.ObjectID, expiresAt time.Time) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

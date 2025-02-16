@@ -15,12 +15,15 @@ type Services struct {
 }
 
 func NewServices(repos *repository.Repositories) *Services {
+	// Initialize the session service first for UserServices
+	sessionServices := NewSessionServices(repos.SessionRepo)
+
 	return &Services{
 		ProductServices: NewProductServices(repos.ProductRepo),
 		OrderServices:   NewOrderServices(repos.OrderRepo),
 		CartServices:    NewCartServices(repos.CartRepo),
-		UserServices:    NewUserServices(repos.UserRepo),
-		SessionServices: NewSessionServices(repos.SessionRepo),
+		UserServices:    NewUserServices(repos.UserRepo, sessionServices),
+		SessionServices: sessionServices, 
 		CategoryService: NewCategoryService(repos.CategoryRepo),
 	}
 }

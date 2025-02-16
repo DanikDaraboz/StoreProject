@@ -33,13 +33,12 @@ type UserServicesInterface interface {
 	RegisterUser(user models.User) (primitive.ObjectID, error)
 	LoginUser(email string, password string) (string, error) // Returns session key
 	LogoutUser(sessionKey string) error
-	GetUser(id string) (models.User, error)
+	GetUser(userID primitive.ObjectID) (models.User, error)
 	UpdateUser(user models.User) error
-	ManageSession(userID string, sessionKey string, action string) error
 }
 
 type SessionServicesInterface interface {
-	CreateSession(userID string) (string, error)
+	CreateSession(userID primitive.ObjectID) (string, error)
 	FindSession(sessionID string) (models.Session, error)
 	DeleteSession(sessionID string) error
 	ClearExpiredSessions() error

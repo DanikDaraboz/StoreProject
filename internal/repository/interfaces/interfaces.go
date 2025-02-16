@@ -37,7 +37,7 @@ type UserRepositoryInterface interface {
 }
 
 type SessionRepositoryInterface interface {
-	InsertSession(sessionID string, userID string, expiresAt time.Time) error
+	InsertSession(sessionID string, userID primitive.ObjectID, expiresAt time.Time) error
 	FindSessionByID(sessionID string) (models.Session, error)
 	DeleteSessionByID(sessionID string) error
 	DeleteExpiredSessions() error
