@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <title>Admin Panel - Products</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 60%; margin: 20px auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 10px; text-align: center; }
+        .actions button { margin: 5px; }
+        form { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        input, button { padding: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Admin Panel - Manage Products</h2>
+
+    <!-- Форма для добавления/обновления товаров -->
+    <form id="productForm">
+        <input type="hidden" id="productId">
+        <input type="text" id="name" placeholder="Product Name" required>
+        <input type="number" id="price" placeholder="Price" required>
+        <input type="text" id="imageUrl" placeholder="Image URL" required>
+        <button type="submit">Save Product</button>
+    </form>
+
+    <!-- Таблица товаров -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="productTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+    // Функция загрузки товаров с сервера
+    async function loadProducts() {
+        const response = await fetch("/products");
+        const products = await response.json();
+        const tableBody = document.getElementById("productTableBody");
+        tableBody.innerHTML = "";
+        products.forEach(product => {
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${product._id}</td>
+                    <td>${product.name}</td>
+                    <td>${product.price} KZT</td>
+                    <td><img src="${product.imageUrl}" width="50"></td>
+                    <td class="actions">
+                        <button onclick="editProduct('${product._id}', '${product.name}', '${product.price}', '${product.imageUrl}')">Edit</button>
+                        <button onclick="deleteProduct('${product._id}')">Delete</button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    // Функция добавления/обновления товара
+    document.getElementById("productForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const productId = document.getElementById("productId").value;
+        const name = document.getElementById("name").value;
+        const price = document.getElementById("price").value;
+        const imageUrl = document.getElementById("imageUrl").value;
+
+        const productData = { name, price, imageUrl };
+
+        if (productId) {
+            await fetch(`/products/${productId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(productData)
+            });
+        } else {
+            await fetch("/products", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(productData)
+            });
+        }
+
+        document.getElementById("productForm").reset();
+        document.getElementById("productId").value = "";
+        loadProducts();
+    });
+
+    // Функция удаления товара
+    async function deleteProduct(id) {
+        if (confirm("Are you sure?")) {
+            await fetch(`/products/${id}`, { method: "DELETE" });
+            loadProducts();
+        }
+    }
+
+    // Функция редактирования товара
+    function editProduct(id, name, price, imageUrl) {
+        document.getElementById("productId").value = id;
+        document.getElementById("name").value = name;
+        document.getElementById("price").value = price;
+        document.getElementById("imageUrl").value = imageUrl;
+    }
+
+    // Загрузка товаров при загрузке страницы
+    loadProducts();
+</script>
+
+</body>
+</html>
