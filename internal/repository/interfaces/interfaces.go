@@ -8,7 +8,7 @@ import (
 )
 
 type ProductRepositoryInterface interface {
-	GetProducts() ([]map[string]interface{}, error)
+	GetProducts() ([]models.Product, error)
 	FetchProductByID(id string) (models.Product, error)
 	InsertProduct(product models.Product) error
 	UpdateProduct(id string, product models.Product) error
@@ -34,7 +34,6 @@ type UserRepositoryInterface interface {
 	FindUserByID(id primitive.ObjectID) (models.User, error)
 	FindUserByEmail(email string) (models.User, error)
 	UpdateUser(user models.User) error
-	ManageSession(userID primitive.ObjectID, sessionKey string, action string) error
 }
 
 type SessionRepositoryInterface interface {
@@ -42,4 +41,12 @@ type SessionRepositoryInterface interface {
 	FindSessionByID(sessionID string) (models.Session, error)
 	DeleteSessionByID(sessionID string) error
 	DeleteExpiredSessions() error
+}
+
+type CategoryRepositoryInterface interface {
+	CreateCategory(category models.Category) (primitive.ObjectID, error)
+	GetAllCategories() ([]models.Category, error)
+	GetCategoryByID(id string) (models.Category, error)
+	UpdateCategory(id string, category models.Category) error
+	DeleteCategory(id string) error
 }

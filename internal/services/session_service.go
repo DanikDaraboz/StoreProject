@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/DanikDaraboz/StoreProject/internal/models"
 	repoInterface "github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
 	"github.com/DanikDaraboz/StoreProject/internal/services/interfaces"
 )
@@ -35,21 +36,21 @@ func (s sessionServices) CreateSession(userID string) (string, error) {
 	return sessionID, nil
 }
 
-func (s sessionServices) FindSession(sessionID string) (string, error) {
+func (s sessionServices) FindSession(sessionID string) (models.Session, error) {
 	session, err := s.sessionRepo.FindSessionByID(sessionID)
 	if err != nil {
-		return "", err
+		return models.Session{}, err
 	}
 
 	if session.ExpiresAt.Before(time.Now()) {
 		err = s.sessionRepo.DeleteSessionByID(sessionID)
 		if err != nil {
-			return "", err
+			return models.Session{}, err
 		}
-		return "", errors.New("session expired")
+		return models.Session{}, errors.New("session expired")
 	}
 
-	return session.UserID, nil
+	return session, nil
 }
 
 func (s sessionServices) DeleteSession(sessionID string) error {

@@ -6,7 +6,7 @@ import (
 )
 
 type ProductServicesInterface interface {
-	GetAllProducts() ([]map[string]interface{}, error)
+	GetAllProducts() ([]models.Product, error)
 	GetProductByID(id string) (models.Product, error)
 	CreateProduct(product models.Product) error
 	UpdateProduct(id string, product models.Product) error
@@ -40,7 +40,14 @@ type UserServicesInterface interface {
 
 type SessionServicesInterface interface {
 	CreateSession(userID string) (string, error)
-	FindSession(sessionID string) (string, error)
+	FindSession(sessionID string) (models.Session, error)
 	DeleteSession(sessionID string) error
 	ClearExpiredSessions() error
+}
+type CategoryServicesInterface interface {
+	CreateCategory(category models.Category) (primitive.ObjectID, error)
+	GetAllCategories() ([]models.Category, error)
+	GetCategoryByID(id string) (models.Category, error)
+	UpdateCategory(id string, category models.Category) error
+	DeleteCategory(id string) error
 }
