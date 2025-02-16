@@ -17,7 +17,7 @@ func NewCategoryService(repo repoInterface.CategoryRepositoryInterface) interfac
 	return &categoryService{repo: repo}
 }
 
-func (c categoryService) CreateCategory(category models.Category) (primitive.ObjectID, error) {
+func (c categoryService) CreateCategory(category *models.Category) (primitive.ObjectID, error) {
 	return c.repo.CreateCategory(category)
 }
 
@@ -25,11 +25,11 @@ func (c categoryService) GetAllCategories() ([]models.Category, error) {
 	return c.repo.GetAllCategories()
 }
 
-func (c categoryService) GetCategoryByID(id string) (models.Category, error) {
+func (c categoryService) GetCategoryByID(id string) (*models.Category, error) {
 	return c.repo.GetCategoryByID(id)
 }
 
-func (c categoryService) UpdateCategory(id string, category models.Category) error {
+func (c categoryService) UpdateCategory(id string, category *models.Category) error {
 	return c.repo.UpdateCategory(id, category)
 }
 

@@ -36,18 +36,18 @@ func (s sessionServices) CreateSession(userID primitive.ObjectID) (string, error
 	return sessionID, nil
 }
 
-func (s sessionServices) FindSession(sessionID string) (models.Session, error) {
+func (s sessionServices) FindSession(sessionID string) (*models.Session, error) {
 	session, err := s.sessionRepo.FindSessionByID(sessionID)
 	if err != nil {
-		return models.Session{}, err
+		return &models.Session{}, err
 	}
 
 	if session.ExpiresAt.Before(time.Now()) {
 		err = s.sessionRepo.DeleteSessionByID(sessionID)
 		if err != nil {
-			return models.Session{}, err
+			return &models.Session{}, err
 		}
-		return models.Session{}, errors.New("session expired")
+		return &models.Session{}, errors.New("session expired")
 	}
 
 	return session, nil

@@ -40,7 +40,7 @@ func (s *Server) GetProductByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	var product models.Product
+	var product *models.Product
 	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
@@ -60,7 +60,7 @@ func (s *Server) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productID := vars["id"]
 
-	var updatedProduct models.Product
+	var updatedProduct *models.Product
 	if err := json.NewDecoder(r.Body).Decode(&updatedProduct); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return

@@ -7,46 +7,47 @@ import (
 
 type ProductServicesInterface interface {
 	GetAllProducts() ([]models.Product, error)
-	GetProductByID(id string) (models.Product, error)
-	CreateProduct(product models.Product) error
-	UpdateProduct(id string, product models.Product) error
+	GetProductByID(id string) (*models.Product, error)
+	CreateProduct(product *models.Product) error
+	UpdateProduct(id string, product *models.Product) error
 	DeleteProduct(id string) error
 }
 
 type OrderServicesInterface interface {
 	FindAllOrders() ([]models.Order, error)
-	GetOrderByID(id string) (models.Order, error)
-	CreateOrder(order models.Order) (primitive.ObjectID, error)
-	UpdateOrder(id string, order models.Order) error
+	GetOrderByID(id string) (*models.Order, error)
+	CreateOrder(order *models.Order) (primitive.ObjectID, error)
+	UpdateOrder(id string, order *models.Order) error
 	DeleteOrder(id string) error
 }
 
 type CartServicesInterface interface {
-	AddItemToCart(userID string, item models.CartItem) error
+	AddItemToCart(userID string, item *models.CartItem) error
 	GetCartItems(userID string) ([]models.CartItem, error)
 	RemoveItemFromCart(userID string, itemID string) error
 	ClearCart(userID string) error
-	UpdateCart(cart models.Cart) error
+	UpdateCart(cart *models.Cart) error
 }
 
 type UserServicesInterface interface {
-	RegisterUser(user models.User) (primitive.ObjectID, error)
+	RegisterUser(user *models.User) (primitive.ObjectID, error)
 	LoginUser(email string, password string) (string, error) // Returns session key
 	LogoutUser(sessionKey string) error
-	GetUser(userID primitive.ObjectID) (models.User, error)
-	UpdateUser(user models.User) error
+	GetUser(userID primitive.ObjectID) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 type SessionServicesInterface interface {
 	CreateSession(userID primitive.ObjectID) (string, error)
-	FindSession(sessionID string) (models.Session, error)
+	FindSession(sessionID string) (*models.Session, error)
 	DeleteSession(sessionID string) error
 	ClearExpiredSessions() error
 }
+
 type CategoryServicesInterface interface {
-	CreateCategory(category models.Category) (primitive.ObjectID, error)
+	CreateCategory(category *models.Category) (primitive.ObjectID, error)
 	GetAllCategories() ([]models.Category, error)
-	GetCategoryByID(id string) (models.Category, error)
-	UpdateCategory(id string, category models.Category) error
+	GetCategoryByID(id string) (*models.Category, error)
+	UpdateCategory(id string, category *models.Category) error
 	DeleteCategory(id string) error
 }

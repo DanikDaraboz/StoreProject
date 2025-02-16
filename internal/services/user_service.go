@@ -21,7 +21,7 @@ func NewUserServices(userRepo repoInterface.UserRepositoryInterface, sessionSvc 
 	return &userServices{userRepo: userRepo, sessionSvc: sessionSvc}
 }
 
-func (u userServices) RegisterUser(user models.User) (primitive.ObjectID, error) {
+func (u *userServices) RegisterUser(user *models.User) (primitive.ObjectID, error) {
 	if user.Email == "" || user.Password == "" {
 		return primitive.NilObjectID, errors.New("email and password required")
 	}
@@ -46,7 +46,7 @@ func (u userServices) RegisterUser(user models.User) (primitive.ObjectID, error)
 	return userID, nil
 }
 
-func (u userServices) LoginUser(email string, password string) (string, error) {
+func (u *userServices) LoginUser(email string, password string) (string, error) {
 	// Retrieve user by email
 	user, err := u.userRepo.FindUserByEmail(email)
 	if err != nil {
@@ -66,7 +66,7 @@ func (u userServices) LoginUser(email string, password string) (string, error) {
 	return sessionKey, nil
 }
 
-func (u userServices) LogoutUser(sessionKey string) error {
+func (u *userServices) LogoutUser(sessionKey string) error {
 	if sessionKey == "" {
 		return errors.New("sessionKey empty")
 	}
@@ -76,9 +76,9 @@ func (u userServices) LogoutUser(sessionKey string) error {
 	return err
 }
 
-func (u userServices) GetUser(userID primitive.ObjectID) (models.User, error) {
+func (u *userServices) GetUser(userID primitive.ObjectID) (*models.User, error) {
 	if userID == primitive.NilObjectID {
-		return models.User{}, errors.New("userID is empty")
+		return &models.User{}, errors.New("userID is empty")
 	}
 
 	user, err := u.userRepo.FindUserByID(userID)
@@ -86,7 +86,7 @@ func (u userServices) GetUser(userID primitive.ObjectID) (models.User, error) {
 	return user, err
 }
 
-func (u userServices) UpdateUser(user models.User) error {
+func (u *userServices) UpdateUser(user *models.User) error {
 	if user.ID == primitive.NilObjectID {
 		return errors.New("invalid user ID")
 	}

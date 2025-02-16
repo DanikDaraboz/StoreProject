@@ -6,6 +6,7 @@ import (
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
 	"github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
+	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,7 +22,7 @@ func NewUserRepository(collection *mongo.Collection) interfaces.UserRepositoryIn
 	return &userRepository{collection: collection}
 }
 
-func (u userRepository) InsertUser(user models.User) (primitive.ObjectID, error) {
+func (u *userRepository) InsertUser(user *models.User) (primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -38,27 +39,27 @@ func (u userRepository) InsertUser(user models.User) (primitive.ObjectID, error)
 	return objectID, nil
 }
 
-func (u userRepository) FindUserByID(userID primitive.ObjectID) (models.User, error) {
+func (u *userRepository) FindUserByID(userID primitive.ObjectID) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var user models.User
 	err := u.collection.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
 
-	return user, err
+	return &user, err
 }
 
-func (u userRepository) FindUserByEmail(email string) (models.User, error) {
+func (u *userRepository) FindUserByEmail(email string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var user models.User
 	err := u.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 
-	return user, err
+	return &user, err
 }
 
-func (u userRepository) UpdateUser(user models.User) error {
+func (u *userRepository) UpdateUser(user *models.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -66,11 +67,14 @@ func (u userRepository) UpdateUser(user models.User) error {
 		"$set": bson.M{
 			"username": user.Username,
 			"email":    user.Email,
+			"password": user.Password,
 			"age":      user.Age,
 			"phone":    user.Phone,
 			"address":  user.Address,
 		},
 	}
+
+	logger.InfoLogger.Println("update mongo:", update)
 
 	_, err := u.collection.UpdateOne(ctx, bson.M{"_id": user.ID}, update)
 	if err != nil {

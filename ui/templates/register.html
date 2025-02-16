@@ -40,9 +40,9 @@
                         <div class="category-menu">
                             <ul>
                                 <li data-category="all"><a href="/all">All products</a></li>
-                                <!-- {{range .Categories}}
-                                    <li><a href="/category/{{.}}">{{.}}</a></li>
-                                {{end}} -->
+                                {{range .Categories}}
+                                    <li><a href="/category/{{.Name}}">{{.}}</a></li>
+                                {{end}}
                             </ul>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
         <div class="auth2">
             <div class="auth-container">
                 <h2 class="signin">Sign Up</h2>
-                <form id="signupForm">
+                <form class="json-form" action="/register" method="post">
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" required>
                     <div id="emailError" class="error-message"></div>
@@ -114,7 +114,7 @@
     <script src="/static/theme-toggle.js"></script>
     <script src="/static/active.js"></script>
     <script src="/static/catalog.js"></script>
-    <script src="/static/register.js"></script>
+    <script src="/static/account.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 </body>

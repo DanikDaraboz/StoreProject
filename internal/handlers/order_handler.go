@@ -38,7 +38,7 @@ func (s *Server) GetOrderByIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
-	var order models.Order
+	var order *models.Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
 		logger.ErrorLogger.Println("Failed to decode order:", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -66,7 +66,7 @@ func (s *Server) UpdateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	orderID := vars["id"]
 
-	var updatedOrder models.Order
+	var updatedOrder *models.Order
 	if err := json.NewDecoder(r.Body).Decode(&updatedOrder); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return

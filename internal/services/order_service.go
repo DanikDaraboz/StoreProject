@@ -20,7 +20,7 @@ func NewOrderServices(orderRepo repoInterface.OrderRepositoryInterface) interfac
 	return &orderServices{orderRepo: orderRepo}
 }
 
-func (o orderServices) FindAllOrders() ([]models.Order, error) {
+func (o *orderServices) FindAllOrders() ([]models.Order, error) {
 	orders, err := o.orderRepo.GetOrders()
 	if err != nil {
 		logger.ErrorLogger.Println("Error fetching orders:", err)
@@ -31,11 +31,11 @@ func (o orderServices) FindAllOrders() ([]models.Order, error) {
 }
 
 // TODO business logic
-func (o orderServices) GetOrderByID(id string) (models.Order, error) {
+func (o *orderServices) GetOrderByID(id string) (*models.Order, error) {
 	return o.orderRepo.FetchOrderByID(id)
 }
 
-func (o orderServices) CreateOrder(order models.Order) (primitive.ObjectID, error) {
+func (o *orderServices) CreateOrder(order *models.Order) (primitive.ObjectID, error) {
 	if err := validateOrder(order); err != nil {
 		logger.ErrorLogger.Println("Order validation failed:", err)
 		return primitive.NilObjectID, err
@@ -44,15 +44,15 @@ func (o orderServices) CreateOrder(order models.Order) (primitive.ObjectID, erro
 	return o.orderRepo.InsertOrder(order)
 }
 
-func (o orderServices) UpdateOrder(id string, order models.Order) error {
+func (o *orderServices) UpdateOrder(id string, order *models.Order) error {
 	return o.orderRepo.UpdateOrder(id, order)
 }
 
-func (o orderServices) DeleteOrder(id string) error {
+func (o *orderServices) DeleteOrder(id string) error {
 	return o.orderRepo.RemoveOrder(id)
 }
 
-func validateOrder(order models.Order) error {
+func validateOrder(order *models.Order) error {
 	if order.UserID == "" {
 		return errors.New("customer ID is required")
 	}

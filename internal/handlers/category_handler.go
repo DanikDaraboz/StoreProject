@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Server) CreateCategory(w http.ResponseWriter, r *http.Request) {
-	var category models.Category
+	var category *models.Category
 	if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
@@ -36,7 +36,7 @@ func (s *Server) GetAllCategories(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	var category models.Category
+	var category *models.Category
 	if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return

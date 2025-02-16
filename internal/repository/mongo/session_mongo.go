@@ -13,17 +13,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var _ interfaces.SessionRepositoryInterface = (*sessionRepository)(nil)
+var _ interfaces.SessionRepositoryInterface = (*sessionRepo)(nil)
 
-type sessionRepository struct {
+type sessionRepo struct {
 	collection *mongo.Collection
 }
 
 func NewSessionRepository(collection *mongo.Collection) interfaces.SessionRepositoryInterface {
-	return &sessionRepository{collection: collection}
+	return &sessionRepo{collection: collection}
 }
 
-func (s sessionRepository) InsertSession(sessionID string, userID primitive.ObjectID, expiresAt time.Time) error {
+func (s *sessionRepo) InsertSession(sessionID string, userID primitive.ObjectID, expiresAt time.Time) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -40,20 +40,20 @@ func (s sessionRepository) InsertSession(sessionID string, userID primitive.Obje
 	return nil
 }
 
-func (s sessionRepository) FindSessionByID(sessionID string) (models.Session, error) {
+func (s *sessionRepo) FindSessionByID(sessionID string) (*models.Session, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var session models.Session
 	err := s.collection.FindOne(ctx, bson.M{"_id": sessionID}).Decode(&session)
 	if err != nil {
-		return models.Session{}, err
+		return &models.Session{}, err
 	}
 
-	return session, nil
+	return &session, nil
 }
 
-func (s sessionRepository) DeleteSessionByID(sessionID string) error {
+func (s *sessionRepo) DeleteSessionByID(sessionID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -69,7 +69,7 @@ func (s sessionRepository) DeleteSessionByID(sessionID string) error {
 	return nil
 }
 
-func (s sessionRepository) DeleteExpiredSessions() error {
+func (s *sessionRepo) DeleteExpiredSessions() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

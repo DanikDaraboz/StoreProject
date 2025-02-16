@@ -12,7 +12,7 @@ import (
 func (s *Server) AddCartItem(w http.ResponseWriter, r *http.Request) {
 	userID := "get" // TODO
 
-	var item models.CartItem
+	var item *models.CartItem
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		logger.ErrorLogger.Println("Invalid request payload:", err)
 		http.Error(w, "Invalid request payload", http.StatusInternalServerError)

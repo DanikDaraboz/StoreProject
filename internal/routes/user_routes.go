@@ -18,4 +18,7 @@ func RegisterUserRoutes(s *handlers.Server) {
 	s.Router.Handle("/user", s.Middleware.AuthMiddleware(http.HandlerFunc(s.RenderUserProfilePage))).Methods("GET") // View user profile
 	s.Router.Handle("/user", s.Middleware.AuthMiddleware(http.HandlerFunc(s.UpdateUser))).Methods("PUT")            // Update user profile
 
+	// Protected (Admin-only)
+	s.Router.Handle("/admin", s.Middleware.AuthMiddleware(s.Middleware.AdminOnlyMiddleware(http.HandlerFunc(s.RenderAdminPage)))).Methods("GET")
+	// s.Router.HandleFunc("/admin", s.RenderAdminPage).Methods("GET")
 }

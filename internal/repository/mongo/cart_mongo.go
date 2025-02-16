@@ -22,7 +22,7 @@ func NewCartRepository(collection *mongo.Collection) interfaces.CartRepositoryIn
 	return &cartRepository{collection: collection}
 }
 
-func (c cartRepository) InsertCart(cart models.Cart) error {
+func (c *cartRepository) InsertCart(cart *models.Cart) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -34,17 +34,17 @@ func (c cartRepository) InsertCart(cart models.Cart) error {
 	return nil
 }
 
-func (c cartRepository) FindCartByUserID(userID primitive.ObjectID) (models.Cart, error) {
+func (c *cartRepository) FindCartByUserID(userID primitive.ObjectID) (*models.Cart, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var cart models.Cart
 	err := c.collection.FindOne(ctx, bson.M{"_id": userID}).Decode(&cart)
 
-	return cart, err
+	return &cart, err
 }
 
-func (c cartRepository) UpdateCart(cart models.Cart) error {
+func (c *cartRepository) UpdateCart(cart *models.Cart) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -68,4 +68,3 @@ func (c cartRepository) UpdateCart(cart models.Cart) error {
 
 	return nil
 }
-

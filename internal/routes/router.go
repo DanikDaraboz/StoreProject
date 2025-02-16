@@ -17,8 +17,8 @@ func RegisterRoutes(s *handlers.Server) {
 	// ClearCart, UpdateCartItemQuantity
 
 	// Public Routes
-	s.Router.HandleFunc("/", s.RenderHomePage).Methods("GET")           // Render the home page
-	s.Router.HandleFunc("/health", s.HealthCheckHandler).Methods("GET") // Health check endpoint
+	s.Router.HandleFunc("/", s.RenderHomePage).Methods("GET")
+	s.Router.HandleFunc("/health", s.HealthCheckHandler).Methods("GET")
 
 	RegisterProductRoutes(s)
 	RegisterOrderRoutes(s)

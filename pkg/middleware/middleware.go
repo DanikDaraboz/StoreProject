@@ -12,13 +12,11 @@ import (
 
 type contextKey string
 
-const userKey contextKey = "user"
-const adminKey contextKey = "admin"
-
 var _ MiddlewareInterface = (*Middleware)(nil)
 
 type MiddlewareInterface interface {
 	AuthMiddleware(next http.Handler) http.Handler
+	AdminOnlyMiddleware(next http.Handler) http.Handler
 }
 
 type Middleware struct {
@@ -28,6 +26,9 @@ type Middleware struct {
 func NewMiddleware(srv *services.Services) MiddlewareInterface {
 	return &Middleware{services: srv}
 }
+
+const UserKey contextKey = "user"
+const AdminKey contextKey = "admin"
 
 func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +55,8 @@ func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Unauthorized, couldnt fetch session", http.StatusUnauthorized)
 			return
 		}
-		var user models.User
-		
+
+		var user *models.User
 		user, err = m.services.UserServices.GetUser(session.UserID)
 		if err != nil {
 			logger.WarnLogger.Println("Couldnt get the user", err)
@@ -63,10 +64,32 @@ func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userKey, user)
+		ctx := context.WithValue(r.Context(), UserKey, user)
 
-		logger.InfoLogger.Println("User is authenticated")
+		logger.InfoLogger.Println("User is authenticated", user)
 
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (m *Middleware) AdminOnlyMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user, ok := r.Context().Value(UserKey).(*models.User)
+		if !ok || user == nil {
+			logger.InfoLogger.Println("Fail to fetch user from context", user)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Check if the user's role is "admin"
+		if user.Role != "admin" {
+			http.Error(w, "Forbidden: Admins only", http.StatusForbidden)
+			return
+		}
+
+		logger.InfoLogger.Println("Admin is authenticated")
+		// Add the admin user to the context using adminKey.
+		ctx := context.WithValue(r.Context(), AdminKey, &user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

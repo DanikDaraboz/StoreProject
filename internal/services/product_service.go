@@ -20,7 +20,7 @@ func NewProductServices(productRepo repoInterface.ProductRepositoryInterface) in
 	return &productService{productRepo: productRepo}
 }
 
-func (p productService) GetAllProducts() ([]models.Product, error) {
+func (p *productService) GetAllProducts() ([]models.Product, error) {
 	products, err := p.productRepo.GetProducts()
 	if err != nil {
 		logger.ErrorLogger.Println("Error fetching products:", err)
@@ -37,15 +37,15 @@ func (p productService) GetAllProducts() ([]models.Product, error) {
 	return products, nil
 }
 
-func (p productService) GetProductByID(id string) (models.Product, error) {
+func (p *productService) GetProductByID(id string) (*models.Product, error) {
 	if id == "" {
-		return models.Product{}, errors.New("product ID cannot be empty")
+		return &models.Product{}, errors.New("product ID cannot be empty")
 	}
 
 	return p.productRepo.FetchProductByID(id)
 }
 
-func (p productService) CreateProduct(product models.Product) error {
+func (p *productService) CreateProduct(product *models.Product) error {
 	if err := validateProduct(product); err != nil {
 		logger.ErrorLogger.Println("Product validation failed:", err)
 		return err
@@ -54,7 +54,7 @@ func (p productService) CreateProduct(product models.Product) error {
 	return p.productRepo.InsertProduct(product)
 }
 
-func (p productService) UpdateProduct(id string, product models.Product) error {
+func (p *productService) UpdateProduct(id string, product *models.Product) error {
 	if id == "" {
 		return errors.New("product ID cannot be empty")
 	}
@@ -77,7 +77,7 @@ func (p productService) UpdateProduct(id string, product models.Product) error {
 	return p.productRepo.UpdateProduct(id, product)
 }
 
-func (p productService) DeleteProduct(id string) error {
+func (p *productService) DeleteProduct(id string) error {
 	if id == "" {
 		return errors.New("product ID cannot be empty")
 	}
@@ -93,7 +93,7 @@ func (p productService) DeleteProduct(id string) error {
 	return p.productRepo.RemoveProduct(id)
 }
 
-func validateProduct(product models.Product) error {
+func validateProduct(product *models.Product) error {
 	if product.Name == "" {
 		return errors.New("product name is required")
 	}
@@ -109,7 +109,7 @@ func validateProduct(product models.Product) error {
 	return nil
 }
 
-func isProductChanged(old, new models.Product) bool {
+func isProductChanged(old, new *models.Product) bool {
 	if old.Name != new.Name ||
 		old.Price != new.Price ||
 		old.Stock != new.Stock ||

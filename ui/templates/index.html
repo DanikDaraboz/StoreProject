@@ -22,7 +22,7 @@
     <header>
       <nav class="navbar2">
         <div class="sign">
-          <a href="/user" id="user-icon" class="user-icon"></a>
+          <a href="/account" id="user-icon" class="user-icon"></a>
           <a href="/login" class="sign-in-btn" id="sign-in-btn">Sign In</a>
           <button class="theme-toggle" onclick="toggleTheme()">
             <img
@@ -50,7 +50,7 @@
         <ul class="nav-list">
           <li class="nav-item active"><a href="/h" class="fix">Home</a></li>
           <li class="nav-item">
-            <div class="category">
+            <div class="catalog">
               <label for="catalog-toggle" id="catalog-text">Catalog</label>
               <input
                 type="checkbox"
@@ -59,15 +59,25 @@
               />
               <div class="category-menu">
                 <ul>
-                  <li data-category="all"><a href="/products">All products</a></li>
-  
+                  <li data-category="all"><a href="/all">All products</a></li>
+                  {{range .Categories}}
+                  <li><a href="/category/{{.ID}}">{{.Name}}</a></li>
+                  {{end}}
+                </ul>
               </div>
             </div>
           </li>
-          <li class="nav-item"><a href="#men" class="fix">Men</a></li>
-          <li class="nav-item"><a href="#women" class="fix">Women</a></li>
-          <a href="/favorites"class="fix"><img src="/static/images/favorites2.png" alt="" id="favorites3"></a>
-          <a href="/cart"class="fix" style="position: absolute; margin-left: 55%;"><img src="/static/images/cart.png" alt="" id="favorites3"></a>
+          <li class="nav-item"><a href="/men" class="fix">Men</a></li>
+          <li class="nav-item"><a href="/women" class="fix">Women</a></li>
+          <a href="/favorites" class="fix"
+            ><img src="/static/images/favorites2.png" alt="" id="favorites3"
+          /></a>
+          <a
+            href="/cart"
+            class="fix"
+            style="position: absolute; margin-left: 55%"
+            ><img src="/static/images/cart.png" alt="" id="favorites3"
+          /></a>
           <!-- Перемещаем кнопку смены темы сюда -->
         </ul>
       </nav>
@@ -122,14 +132,21 @@
       <h1 class="htext2">TOP PICS FOR YOU</h1>
       <div class="product-list">
         {{range .Products}}
-        <div class="product-card">
-          {{range.Images}}
-            <img src="{{.}}" alt="{{.Name}}" class="product-image" />
-          {{end}}
+        <div class="product-card2">
+          <img
+            src="{{index .Images 0}}"
+            alt="{{.Name}}"
+            class="product-image"
+          />
           <h2>{{.Name}}</h2>
           <p class="product-price">${{.Price}}</p>
           <a href="/product?id={{.ID}}" class="view-details">View Details</a>
-          <img src="/static/images/favorites2.png" alt="Add to Favorites" class="favorites-icon" data-id="{{.ID}}">
+          <img
+            src="/static/images/favorites2.png"
+            alt="Add to Favorites"
+            class="favorites-icon"
+            data-id="{{.ID}}"
+          />
         </div>
         {{end}}
       </div>
@@ -150,7 +167,7 @@
           alt="..."
           id="car2"
         />
-        <div class="imgtext"><a href="/women" class="hjk">MEN</a></div>
+        <div class="imgtext"><a href="/women" class="hjk">WOMEN</a></div>
       </div>
       <div class="imgcont">
         <img
@@ -159,7 +176,9 @@
           alt="..."
           id="car2"
         />
-        <div class="imgtext"><a href="/category/shoes" class="hjk">MEN</a></div>
+        <div class="imgtext">
+          <a href="/category/shoes" class="hjk">SHOES</a>
+        </div>
       </div>
     </main>
 
@@ -201,13 +220,12 @@
 
     <!-- Link to the external JS file -->
 
-    <script src="/static/theme-toggle.js"></script>
+    <!-- <script src="/static/theme-toggle.js"></script>
     <script src="/static/active.js"></script>
     <script src="/static/catalog.js"></script>
     <script src="/static/account.js"></script>
+    <script src="/static/favorites.js"></script>
+    <script src="/static/cart.js"></script> -->
+    <script src="/static/main.js"></script>
   </body>
 </html>
-
-
-
-

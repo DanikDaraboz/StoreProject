@@ -21,7 +21,7 @@ func NewCategoryRepository(collection *mongo.Collection) interfaces.CategoryRepo
 	return &categoryRepo{collection: collection}
 }
 
-func (c categoryRepo) CreateCategory(category models.Category) (primitive.ObjectID, error) {
+func (c *categoryRepo) CreateCategory(category *models.Category) (primitive.ObjectID, error) {
 	category.ID = primitive.NewObjectID()
 	category.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	category.UpdatedAt = category.CreatedAt
@@ -33,7 +33,7 @@ func (c categoryRepo) CreateCategory(category models.Category) (primitive.Object
 	return res.InsertedID.(primitive.ObjectID), nil
 }
 
-func (c categoryRepo) GetAllCategories() ([]models.Category, error) {
+func (c *categoryRepo) GetAllCategories() ([]models.Category, error) {
 	cursor, err := c.collection.Find(context.TODO(), bson.M{})
 	if err != nil {
 		return nil, err
@@ -45,22 +45,22 @@ func (c categoryRepo) GetAllCategories() ([]models.Category, error) {
 	return categories, nil
 }
 
-func (c categoryRepo) GetCategoryByID(id string) (models.Category, error) {
+func (c *categoryRepo) GetCategoryByID(id string) (*models.Category, error) {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return models.Category{}, err
+		return &models.Category{}, err
 	}
 
 	var category models.Category
 	err = c.collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&category)
 	if err != nil {
-		return models.Category{}, err
+		return &models.Category{}, err
 	}
 
-	return category, nil
+	return &category, nil
 }
 
-func (c categoryRepo) UpdateCategory(id string, category models.Category) error {
+func (c *categoryRepo) UpdateCategory(id string, category *models.Category) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -76,11 +76,11 @@ func (c categoryRepo) UpdateCategory(id string, category models.Category) error 
 	return err
 }
 
-func (r categoryRepo) DeleteCategory(id string) error {
+func (c *categoryRepo) DeleteCategory(id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-	_, err = r.collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	_, err = c.collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
 	return err
 }

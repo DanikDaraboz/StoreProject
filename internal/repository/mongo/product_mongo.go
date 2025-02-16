@@ -41,21 +41,21 @@ func (p *productRepository) GetProducts() ([]models.Product, error) {
 	return products, nil
 }
 
-func (p *productRepository) FetchProductByID(id string) (models.Product, error) {
+func (p *productRepository) FetchProductByID(id string) (*models.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var product models.Product
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return product, err
+		return &product, err
 	}
 
 	err = p.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&product)
-	return product, err
+	return &product, err
 }
 
-func (p *productRepository) InsertProduct(product models.Product) error {
+func (p *productRepository) InsertProduct(product *models.Product) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -67,7 +67,7 @@ func (p *productRepository) InsertProduct(product models.Product) error {
 	return err
 }
 
-func (p *productRepository) UpdateProduct(id string, product models.Product) error {
+func (p *productRepository) UpdateProduct(id string, product *models.Product) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

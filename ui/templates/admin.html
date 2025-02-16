@@ -1,120 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/styles.css">   
-    <title>Admin Panel - Products</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { width: 60%; margin: 20px auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table, th, td { border: 1px solid black; }
-        th, td { padding: 10px; text-align: center; }
-        .actions button { margin: 5px; }
-        form { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        input, button { padding: 8px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    h1, h2, h3 {
+      color: #333;
+    }
+    .section {
+      margin-bottom: 40px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    form > div {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007BFF;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
+  <h1>Admin Panel</h1>
 
-<div class="container">
-    <h2>Admin Panel - Manage Products</h2>
+  <!-- Product Management Section -->
+  <div class="section" id="product-management">
+    <h2>Product Management</h2>
 
-    <!-- Форма для добавления/обновления товаров -->
-    <form id="productForm">
-        <input type="hidden" id="productId">
-        <input type="text" id="name" placeholder="Product Name" required>
-        <input type="number" id="price" placeholder="Price" required>
-        <input type="text" id="imageUrl" placeholder="Image URL" required>
-        <button type="submit">Save Product</button>
+    <!-- Create Product -->
+    <form id="createProductForm">
+      <h3>Create Product</h3>
+      <div>
+        <label for="productName">Name:</label>
+        <input type="text" id="productName" name="name" required />
+      </div>
+      <div>
+        <label for="productDescription">Description:</label>
+        <textarea id="productDescription" name="description" required></textarea>
+      </div>
+      <div>
+        <label for="productPrice">Price:</label>
+        <input type="number" id="productPrice" name="price" step="0.01" required />
+      </div>
+      <div>
+        <label for="productCategory">Category:</label>
+        <input type="text" id="productCategory" name="category" required />
+      </div>
+      <div>
+        <label for="productImage">Image URL:</label>
+        <input type="text" id="productImage" name="image" required />
+      </div>
+      <button type="submit">Create Product</button>
     </form>
 
-    <!-- Таблица товаров -->
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Image</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="productTableBody"></tbody>
-    </table>
-</div>
+    <!-- Update Product -->
+    <form id="updateProductForm">
+      <h3>Update Product</h3>
+      <div>
+        <label for="updateProductId">Product ID:</label>
+        <input type="text" id="updateProductId" name="id" required />
+      </div>
+      <div>
+        <label for="updateProductName">New Name:</label>
+        <input type="text" id="updateProductName" name="name" />
+      </div>
+      <div>
+        <label for="updateProductDescription">New Description:</label>
+        <textarea id="updateProductDescription" name="description"></textarea>
+      </div>
+      <div>
+        <label for="updateProductPrice">New Price:</label>
+        <input type="number" id="updateProductPrice" name="price" step="0.01" />
+      </div>
+      <div>
+        <label for="updateProductCategory">New Category:</label>
+        <input type="text" id="updateProductCategory" name="category" />
+      </div>
+      <div>
+        <label for="updateProductImage">New Image URL:</label>
+        <input type="text" id="updateProductImage" name="image" />
+      </div>
+      <button type="submit">Update Product</button>
+    </form>
 
-<script>
-    // Функция загрузки товаров с сервера
-    async function loadProducts() {
-        const response = await fetch("/products");
-        const products = await response.json();
-        const tableBody = document.getElementById("productTableBody");
-        tableBody.innerHTML = "";
-        products.forEach(product => {
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${product._id}</td>
-                    <td>${product.name}</td>
-                    <td>${product.price} KZT</td>
-                    <td><img src="${product.imageUrl}" width="50"></td>
-                    <td class="actions">
-                        <button onclick="editProduct('${product._id}', '${product.name}', '${product.price}', '${product.imageUrl}')">Edit</button>
-                        <button onclick="deleteProduct('${product._id}')">Delete</button>
-                    </td>
-                </tr>`;
+    <!-- Delete Product -->
+    <form id="deleteProductForm">
+      <h3>Delete Product</h3>
+      <div>
+        <label for="deleteProductId">Product ID:</label>
+        <input type="text" id="deleteProductId" name="id" required />
+      </div>
+      <button type="submit">Delete Product</button>
+    </form>
+  </div>
+
+  <!-- Category Management Section -->
+  <div class="section" id="category-management">
+    <h2>Category Management</h2>
+
+    <!-- Create Category -->
+    <form id="createCategoryForm">
+      <h3>Create Category</h3>
+      <div>
+        <label for="categoryName">Name:</label>
+        <input type="text" id="categoryName" name="name" required />
+      </div>
+      <button type="submit">Create Category</button>
+    </form>
+
+    <!-- Update Category -->
+    <form id="updateCategoryForm">
+      <h3>Update Category</h3>
+      <div>
+        <label for="updateCategoryId">Category ID:</label>
+        <input type="text" id="updateCategoryId" name="id" required />
+      </div>
+      <div>
+        <label for="updateCategoryName">New Name:</label>
+        <input type="text" id="updateCategoryName" name="name" required />
+      </div>
+      <button type="submit">Update Category</button>
+    </form>
+
+    <!-- Delete Category -->
+    <form id="deleteCategoryForm">
+      <h3>Delete Category</h3>
+      <div>
+        <label for="deleteCategoryId">Category ID:</label>
+        <input type="text" id="deleteCategoryId" name="id" required />
+      </div>
+      <button type="submit">Delete Category</button>
+    </form>
+  </div>
+
+  <script>
+    // Create Product (POST /products)
+    document.getElementById('createProductForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        name: document.getElementById('productName').value,
+        description: document.getElementById('productDescription').value,
+        price: parseFloat(document.getElementById('productPrice').value),
+        category: document.getElementById('productCategory').value,
+        image: document.getElementById('productImage').value,
+      };
+
+      try {
+        const res = await fetch('/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
         });
-    }
-
-    // Функция добавления/обновления товара
-    document.getElementById("productForm").addEventListener("submit", async function (event) {
-        event.preventDefault();
-        const productId = document.getElementById("productId").value;
-        const name = document.getElementById("name").value;
-        const price = document.getElementById("price").value;
-        const imageUrl = document.getElementById("imageUrl").value;
-
-        const productData = { name, price, imageUrl };
-
-        if (productId) {
-            await fetch(`/products/${productId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(productData)
-            });
-        } else {
-            await fetch("/products", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(productData)
-            });
-        }
-
-        document.getElementById("productForm").reset();
-        document.getElementById("productId").value = "";
-        loadProducts();
+        const result = await res.json();
+        alert(result.message || 'Product created successfully');
+      } catch (err) {
+        console.error(err);
+        alert('Error creating product');
+      }
     });
 
-    // Функция удаления товара
-    async function deleteProduct(id) {
-        if (confirm("Are you sure?")) {
-            await fetch(`/products/${id}`, { method: "DELETE" });
-            loadProducts();
+    // Update Product (PUT /products/{id})
+    document.getElementById('updateProductForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const productId = document.getElementById('updateProductId').value;
+      const data = {
+        name: document.getElementById('updateProductName').value,
+        description: document.getElementById('updateProductDescription').value,
+        price: document.getElementById('updateProductPrice').value ? parseFloat(document.getElementById('updateProductPrice').value) : undefined,
+        category: document.getElementById('updateProductCategory').value,
+        image: document.getElementById('updateProductImage').value,
+      };
+
+      // Remove keys with empty or undefined values
+      Object.keys(data).forEach(key => {
+        if (data[key] === '' || data[key] === undefined) {
+          delete data[key];
         }
-    }
+      });
 
-    // Функция редактирования товара
-    function editProduct(id, name, price, imageUrl) {
-        document.getElementById("productId").value = id;
-        document.getElementById("name").value = name;
-        document.getElementById("price").value = price;
-        document.getElementById("imageUrl").value = imageUrl;
-    }
+      try {
+        const res = await fetch(`/products/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        alert(result.message || 'Product updated successfully');
+      } catch (err) {
+        console.error(err);
+        alert('Error updating product');
+      }
+    });
 
-    // Загрузка товаров при загрузке страницы
-    loadProducts();
-</script>
+    // Delete Product (DELETE /products/{id})
+    document.getElementById('deleteProductForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const productId = document.getElementById('deleteProductId').value;
 
+      try {
+        const res = await fetch(`/products/${productId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await res.json();
+        alert(result.message || 'Product deleted successfully');
+      } catch (err) {
+        console.error(err);
+        alert('Error deleting product');
+      }
+    });
+
+    // Create Category (POST /categories)
+    document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        name: document.getElementById('categoryName').value,
+      };
+
+      try {
+        const res = await fetch('/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        alert(result.message || 'Category created successfully');
+      } catch (err) {
+        console.error(err);
+        alert('Error creating category');
+      }
+    });
+
+    // Update Category (PUT /categories/{id})
+    document.getElementById('updateCategoryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const categoryId = document.getElementById('updateCategoryId').value;
+      const data = {
+        name: document.getElementById('updateCategoryName').value,
+      };
+
+      try {
+        const res = await fetch(`/categories/${categoryId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        alert(result.message || 'Category updated successfully');
+      } catch (err) {
+        console.error(err);
+        alert('Error updating category');
+      }
+    });
+
+    // Delete Category (DELETE /categories/{id})
+    document.getElementById('deleteCategoryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const categoryId = document.getElementById('deleteCategoryId').value;
+
+      try {
+        const res = await fetch(`/categories/${categoryId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const result = await res.json();
+        alert(result.message || 'Category deleted successfully');
+      } catch (err) {
+        console.error(err);
+        alert('Error deleting category');
+      }
+    });
+  </script>
 </body>
 </html>

@@ -42,21 +42,21 @@ func (o *orderRepository) GetOrders() ([]models.Order, error) {
 	return orders, nil
 }
 
-func (o *orderRepository) FetchOrderByID(id string) (models.Order, error) {
+func (o *orderRepository) FetchOrderByID(id string) (*models.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var order models.Order
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return order, err
+		return &order, err
 	}
 
 	err = o.collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&order)
-	return order, err
+	return &order, err
 }
 
-func (o *orderRepository) InsertOrder(order models.Order) (primitive.ObjectID, error) {
+func (o *orderRepository) InsertOrder(order *models.Order) (primitive.ObjectID, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -77,7 +77,7 @@ func (o *orderRepository) InsertOrder(order models.Order) (primitive.ObjectID, e
 	return insertedID, nil
 }
 
-func (o *orderRepository) UpdateOrder(id string, order models.Order) error {
+func (o *orderRepository) UpdateOrder(id string, order *models.Order) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

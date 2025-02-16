@@ -20,7 +20,7 @@ func NewCartServices(cartRepo repoInterface.CartRepositoryInterface) interfaces.
 	return &cartServices{cartRepo: cartRepo}
 }
 
-func (c cartServices) AddItemToCart(userID string, item models.CartItem) error {
+func (c *cartServices) AddItemToCart(userID string, item *models.CartItem) error {
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
@@ -32,10 +32,10 @@ func (c cartServices) AddItemToCart(userID string, item models.CartItem) error {
 		if err == mongo.ErrNoDocuments {
 			newCart := models.Cart{
 				UserID:     objectID,
-				Items:      []models.CartItem{item},
+				Items:      []models.CartItem{*item},
 				TotalPrice: item.Price * float64(item.Quantity),
 			}
-			return c.cartRepo.InsertCart(newCart)
+			return c.cartRepo.InsertCart(&newCart)
 		}
 		return err
 	}
@@ -45,7 +45,7 @@ func (c cartServices) AddItemToCart(userID string, item models.CartItem) error {
 	if exists {
 		cart.Items[index].Quantity += item.Quantity
 	} else {
-		cart.Items = append(cart.Items, item)
+		cart.Items = append(cart.Items, *item)
 	}
 
 	cart.TotalPrice = calculateTotal(cart.Items)
@@ -54,13 +54,13 @@ func (c cartServices) AddItemToCart(userID string, item models.CartItem) error {
 
 }
 
-func (c cartServices) GetCartItems(userID string) ([]models.CartItem, error) {
+func (c *cartServices) GetCartItems(userID string) ([]models.CartItem, error) {
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return []models.CartItem{}, err
 	}
 
-	var cart models.Cart
+	var cart *models.Cart
 	cart, err = c.cartRepo.FindCartByUserID(objectID)
 	if err != nil {
 		return []models.CartItem{}, err
@@ -69,7 +69,7 @@ func (c cartServices) GetCartItems(userID string) ([]models.CartItem, error) {
 	return cart.Items, nil
 }
 
-func (c cartServices) RemoveItemFromCart(userID string, itemID string) error {
+func (c *cartServices) RemoveItemFromCart(userID string, itemID string) error {
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (c cartServices) RemoveItemFromCart(userID string, itemID string) error {
 		return err
 	}
 
-	var cart models.Cart
+	var cart *models.Cart
 	cart, err = c.cartRepo.FindCartByUserID(objectID)
 	if err != nil {
 		// if no cart exist, create one
@@ -104,13 +104,13 @@ func (c cartServices) RemoveItemFromCart(userID string, itemID string) error {
 	return c.cartRepo.UpdateCart(cart)
 }
 
-func (c cartServices) ClearCart(userID string) error {
+func (c *cartServices) ClearCart(userID string) error {
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
 	}
 
-	var cart models.Cart
+	var cart *models.Cart
 	cart, err = c.cartRepo.FindCartByUserID(objectID)
 	if err != nil {
 		return err
@@ -123,11 +123,11 @@ func (c cartServices) ClearCart(userID string) error {
 	return c.cartRepo.UpdateCart(cart)
 }
 
-func (c cartServices) UpdateCart(cart models.Cart) error {
+func (c *cartServices) UpdateCart(cart *models.Cart) error {
 	return c.cartRepo.UpdateCart(cart)
 }
 
-func itemExists(cart models.Cart, productID primitive.ObjectID) (int, bool) {
+func itemExists(cart *models.Cart, productID primitive.ObjectID) (int, bool) {
 	for index, item := range cart.Items {
 		if item.ProductID == productID {
 			return index, true
