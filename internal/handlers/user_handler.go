@@ -15,14 +15,12 @@ func (s *Server) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 
-	// Decode the JSON request body.
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logger.ErrorLogger.Println("Failed to decode JSON:", err)
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
-	// Use the decoded values.
 	sessionKey, err := s.Services.UserServices.LoginUser(input.Email, input.Password)
 	if sessionKey == "" || err != nil {
 		logger.WarnLogger.Println("Login failed:", err)
@@ -30,7 +28,6 @@ func (s *Server) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the session cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionKey,
@@ -38,7 +35,6 @@ func (s *Server) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
-	// Return the session key as JSON.
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(sessionKey)
@@ -50,21 +46,18 @@ func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 
-	// Decode the JSON request body
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logger.ErrorLogger.Println("Failed to decode JSON:", err)
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
-	// Create a new user with the provided data
 	user := &models.User{
 		Email:    input.Email,
 		Password: input.Password,
 		Role:     "user",
 	}
 
-	// Register the user
 	userID, err := s.Services.UserServices.RegisterUser(user)
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to register:", err)
@@ -72,14 +65,12 @@ func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return the newly created user ID as JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userID)
 }
 
 func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
-	// Retrieve the session cookie
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		logger.ErrorLogger.Println("Session cookie not found:", err)
@@ -89,7 +80,6 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 
 	sessionKey := cookie.Value
 
-	// Call the logout service with the session key
 	err = s.Services.UserServices.LogoutUser(sessionKey)
 	if err != nil {
 		logger.ErrorLogger.Println("Logout failed:", err)
@@ -97,7 +87,6 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Invalidate the session cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    "",
@@ -106,7 +95,6 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	// Return a JSON response indicating success
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Logged out successfully"})

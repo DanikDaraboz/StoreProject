@@ -12,7 +12,7 @@ func RegisterUserRoutes(s *handlers.Server) {
 	s.Router.HandleFunc("/login", s.LoginUser).Methods("POST")            // Process login
 	s.Router.HandleFunc("/register", s.RenderRegisterPage).Methods("GET") // Render registration form
 	s.Router.HandleFunc("/register", s.RegisterUser).Methods("POST")      // Process registration
-	s.Router.HandleFunc("/logout", s.Logout).Methods("POST")              // Handle logout
+	s.Router.HandleFunc("/logout", s.Logout).Methods("GET", "POST")
 
 	// Protected user routes (User-only)
 	s.Router.Handle("/user", s.Middleware.AuthMiddleware(http.HandlerFunc(s.RenderUserProfilePage))).Methods("GET") // View user profile
