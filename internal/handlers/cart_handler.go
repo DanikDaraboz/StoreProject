@@ -89,7 +89,6 @@ func (s *Server) GetCartItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UpdateCartItem(w http.ResponseWriter, r *http.Request) {
-	// Retrieve session cookie
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		logger.ErrorLogger.Println("Session cookie not found:", err)
@@ -98,7 +97,6 @@ func (s *Server) UpdateCartItem(w http.ResponseWriter, r *http.Request) {
 	}
 	sessionKey := cookie.Value
 
-	// Find session
 	session, err := s.Services.SessionServices.FindSession(sessionKey)
 	if err != nil {
 		logger.ErrorLogger.Println("Session not found:", err)
@@ -106,7 +104,6 @@ func (s *Server) UpdateCartItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user from session
 	user, err := s.Services.UserServices.GetUser(session.UserID)
 	if err != nil {
 		logger.ErrorLogger.Println("User not found:", err)
@@ -114,7 +111,6 @@ func (s *Server) UpdateCartItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Decode the JSON payload
 	var input struct {
 		ProductID string `json:"product_id"`
 		Quantity  int    `json:"quantity"`
@@ -133,14 +129,12 @@ func (s *Server) UpdateCartItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Call the service method to update the cart item
 	if err := s.Services.CartServices.UpdateCartItem(user.ID, prodID, input.Quantity); err != nil {
 		logger.ErrorLogger.Println("Failed to update cart item:", err)
 		http.Error(w, "Failed to update cart item", http.StatusInternalServerError)
 		return
 	}
 
-	// Return a success JSON response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Cart item updated successfully"})

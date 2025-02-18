@@ -36,7 +36,7 @@ func NewTemplateCache() (map[string]*template.Template, error) {
 		"mul": Mul,
 	}
 
-	// Find all HTML templates in the "templates" folder
+	// Find all HTML templates 
 	pages, err := fs.Glob(ui.Files, "templates/*.html")
 	if err != nil {
 		return nil, fmt.Errorf("error globbing templates: %w", err)
