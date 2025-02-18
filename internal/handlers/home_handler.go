@@ -9,6 +9,28 @@ import (
 )
 
 func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		logger.ErrorLogger.Println("Session cookie not found:", err)
+		http.Error(w, "No active session", http.StatusBadRequest)
+		return
+	}
+
+	sessionKey := cookie.Value
+	session, err := s.Services.SessionServices.FindSession(sessionKey)
+	if err != nil {
+		logger.ErrorLogger.Println("Session not found:", err)
+		http.Error(w, "No active session", http.StatusInternalServerError)
+		return
+	}
+
+	user, err := s.Services.UserServices.GetUser(session.UserID)
+	if err != nil {
+		logger.ErrorLogger.Println("User not found:", err)
+		http.Error(w, "User not found", http.StatusInternalServerError)
+		return
+	}
+
 	// Fetch all products
 	products, err := s.Services.ProductServices.GetAllProducts()
 	if err != nil {
@@ -17,6 +39,7 @@ func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch all categories
 	categories, err := s.Services.CategoryService.GetAllCategories()
 	if err != nil {
 		logger.ErrorLogger.Printf("Failed to fetch categories: %v", err)
@@ -24,16 +47,25 @@ func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Prepare the template data
 	data := TemplateData{
 		Title:      "Home page",
 		Products:   &products,
 		Categories: &categories,
+		User:       user,
 	}
 
-	// Render the cached template
-	ts := s.TemplatesCache["index.html"]
+	// Retrieve the cached template
+	ts, ok := s.TemplatesCache["index.html"]
+	if !ok {
+		logger.ErrorLogger.Println("Template index.html not found in cache")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Execute the template with the provided data
 	if err := ts.Execute(w, data); err != nil {
-		logger.ErrorLogger.Println("Failed to render template:", err)
+		logger.ErrorLogger.Printf("Failed to render template: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}

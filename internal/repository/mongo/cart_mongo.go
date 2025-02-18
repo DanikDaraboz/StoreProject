@@ -7,6 +7,7 @@ import (
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
 	"github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
+	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,6 +29,7 @@ func (c *cartRepository) InsertCart(cart *models.Cart) error {
 
 	_, err := c.collection.InsertOne(ctx, cart)
 	if err != nil {
+		logger.ErrorLogger.Println("error", err)
 		return err
 	}
 
@@ -39,8 +41,11 @@ func (c *cartRepository) FindCartByUserID(userID primitive.ObjectID) (*models.Ca
 	defer cancel()
 
 	var cart models.Cart
-	err := c.collection.FindOne(ctx, bson.M{"_id": userID}).Decode(&cart)
-
+	// Query by "user_id" instead of "_id"
+	err := c.collection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&cart)
+	if err != nil {
+		logger.ErrorLogger.Println("error", err)
+	}
 	return &cart, err
 }
 
@@ -56,14 +61,16 @@ func (c *cartRepository) UpdateCart(cart *models.Cart) error {
 		},
 	}
 
-	// Perform the update operation using UserID
-	result, err := c.collection.UpdateOne(ctx, bson.M{"_id": cart.UserID}, update)
+	result, err := c.collection.UpdateOne(ctx, bson.M{"user_id": cart.UserID}, update)
 	if err != nil {
+		logger.ErrorLogger.Println("error", err)
 		return err
 	}
 
 	if result.MatchedCount == 0 {
-		return errors.New("no cart found to update")
+		err = errors.New("no cart found to update")
+		logger.ErrorLogger.Println("error", err)
+		return err
 	}
 
 	return nil

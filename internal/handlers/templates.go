@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
-	"net/http"
 	"path/filepath"
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
@@ -25,35 +24,32 @@ type TemplateData struct {
 	Categories *[]models.Category
 }
 
+func Mul(a float64, b int) float64 {
+	return a * float64(b)
+}
+
 func NewTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	pages, err := fs.Glob(ui.Files, "templates/*.html")
-	if err != nil {
-		return nil, err
+	// Define a function map and include custom functions like Mul
+	funcMap := template.FuncMap{
+		"mul": Mul,
 	}
 
+	// Find all HTML templates in the "templates" folder
+	pages, err := fs.Glob(ui.Files, "templates/*.html")
+	if err != nil {
+		return nil, fmt.Errorf("error globbing templates: %w", err)
+	}
+
+	// Parse each template with the custom functions
 	for _, page := range pages {
-		ts, err := template.ParseFS(ui.Files, page)
+		ts, err := template.New(filepath.Base(page)).Funcs(funcMap).ParseFS(ui.Files, page)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error parsing template %s: %w", page, err)
 		}
 		cache[filepath.Base(page)] = ts
 	}
 
 	return cache, nil
-}
-
-func RenderTemplate(w http.ResponseWriter, tmplName string, data interface{}) error {
-	cache, err := NewTemplateCache()
-	if err != nil {
-		return err
-	}
-
-	tmpl, ok := cache[tmplName]
-	if !ok {
-		return fmt.Errorf("template not found: %s", tmplName)
-	}
-
-	return tmpl.Execute(w, data)
 }

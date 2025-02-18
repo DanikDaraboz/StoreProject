@@ -10,24 +10,27 @@ import (
 )
 
 func (s *Server) LoginUser(w http.ResponseWriter, r *http.Request) {
-	// Parse form data
-	if err := r.ParseForm(); err != nil {
-		logger.ErrorLogger.Println("Failed to parse form:", err)
-		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	// Decode the JSON request body.
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		logger.ErrorLogger.Println("Failed to decode JSON:", err)
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
-	// Extract email and password
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-
-	sessionKey, err := s.Services.UserServices.LoginUser(email, password)
+	// Use the decoded values.
+	sessionKey, err := s.Services.UserServices.LoginUser(input.Email, input.Password)
 	if sessionKey == "" || err != nil {
 		logger.WarnLogger.Println("Login failed:", err)
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
 
+	// Set the session cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionKey,
@@ -35,27 +38,33 @@ func (s *Server) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
+	// Return the session key as JSON.
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(sessionKey)
 }
 
 func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		logger.ErrorLogger.Println("Failed to parse form:", err)
-		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	// Decode the JSON request body
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		logger.ErrorLogger.Println("Failed to decode JSON:", err)
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
-	// Extract email and password
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-
+	// Create a new user with the provided data
 	user := &models.User{
-		Email:    email,
-		Password: password,
+		Email:    input.Email,
+		Password: input.Password,
+		Role:     "user",
 	}
 
+	// Register the user
 	userID, err := s.Services.UserServices.RegisterUser(user)
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to register:", err)
@@ -63,13 +72,44 @@ func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return the newly created user ID as JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userID)
 }
 
 func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
+	// Retrieve the session cookie
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		logger.ErrorLogger.Println("Session cookie not found:", err)
+		http.Error(w, "No active session", http.StatusBadRequest)
+		return
+	}
 
+	sessionKey := cookie.Value
+
+	// Call the logout service with the session key
+	err = s.Services.UserServices.LogoutUser(sessionKey)
+	if err != nil {
+		logger.ErrorLogger.Println("Logout failed:", err)
+		http.Error(w, "Logout failed", http.StatusInternalServerError)
+		return
+	}
+
+	// Invalidate the session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+
+	// Return a JSON response indicating success
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Logged out successfully"})
 }
 
 func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -158,9 +198,17 @@ func (s *Server) RenderUserProfilePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	categories, err := s.Services.CategoryService.GetAllCategories()
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to fetch categories: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	data := TemplateData{
-		Title: "User Profile",
-		User:  updatedUser,
+		Title:      "User Profile",
+		Categories: &categories,
+		User:       updatedUser,
 	}
 
 	tmpl, exists := s.TemplatesCache["profile.html"]

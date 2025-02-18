@@ -6,6 +6,7 @@ import (
 	"github.com/DanikDaraboz/StoreProject/internal/models"
 	repoInterface "github.com/DanikDaraboz/StoreProject/internal/repository/interfaces"
 	"github.com/DanikDaraboz/StoreProject/internal/services/interfaces"
+	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -20,23 +21,68 @@ func NewCartServices(cartRepo repoInterface.CartRepositoryInterface) interfaces.
 	return &cartServices{cartRepo: cartRepo}
 }
 
-func (c *cartServices) AddItemToCart(userID string, item *models.CartItem) error {
-	objectID, err := primitive.ObjectIDFromHex(userID)
+func (c *cartServices) GetCart(userID primitive.ObjectID) (*models.Cart, error) {
+	cart, err := c.cartRepo.FindCartByUserID(userID)
 	if err != nil {
-		return err
+		logger.ErrorLogger.Println("error", err)
+		return nil, err
 	}
+	return cart, nil
+}
 
-	cart, err := c.cartRepo.FindCartByUserID(objectID)
+func (c *cartServices) UpdateCartItem(userID primitive.ObjectID, productID primitive.ObjectID, quantity int) error {
+    cart, err := c.cartRepo.FindCartByUserID(userID)
+    if err != nil {
+        logger.ErrorLogger.Println("error", err)
+        return err
+    }
+
+    // Update the cart item quantity if exists
+   	updated := false
+    for i, item := range cart.Items {
+        if item.ProductID == productID {
+            if quantity <= 0 {
+                // Remove the item if quantity is 0 or negative
+                cart.Items = append(cart.Items[:i], cart.Items[i+1:]...)
+            } else {
+                cart.Items[i].Quantity = quantity
+            }
+            updated = true
+            break
+        }
+    }
+    if !updated {
+        return errors.New("cart item not found")
+    }
+
+    // Recalculate the total price
+    cart.TotalPrice = calculateTotal(cart.Items)
+
+    // Persist the updated cart
+    if err := c.cartRepo.UpdateCart(cart); err != nil {
+        logger.ErrorLogger.Println("error", err)
+        return err
+    }
+
+    return nil
+}
+
+
+func (c *cartServices) AddItemToCart(userID primitive.ObjectID, item *models.CartItem) error {
+	cart, err := c.cartRepo.FindCartByUserID(userID)
+	logger.ErrorLogger.Println("additemtocart service")
 	if err != nil {
-		// if no cart exist, create one
+		// if no cart exists, create one
 		if err == mongo.ErrNoDocuments {
 			newCart := models.Cart{
-				UserID:     objectID,
+				UserID:     userID,
 				Items:      []models.CartItem{*item},
 				TotalPrice: item.Price * float64(item.Quantity),
 			}
+			logger.ErrorLogger.Println("error", err)
 			return c.cartRepo.InsertCart(&newCart)
 		}
+		logger.ErrorLogger.Println("error", err)
 		return err
 	}
 
@@ -50,42 +96,40 @@ func (c *cartServices) AddItemToCart(userID string, item *models.CartItem) error
 
 	cart.TotalPrice = calculateTotal(cart.Items)
 
-	return c.cartRepo.UpdateCart(cart)
-
+	err = c.cartRepo.UpdateCart(cart)
+	if err != nil {
+		logger.ErrorLogger.Println("error", err)
+	}
+	return err
 }
 
-func (c *cartServices) GetCartItems(userID string) ([]models.CartItem, error) {
-	objectID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return []models.CartItem{}, err
-	}
-
+func (c *cartServices) GetCartItems(userID primitive.ObjectID) ([]models.CartItem, error) {
 	var cart *models.Cart
-	cart, err = c.cartRepo.FindCartByUserID(objectID)
+	cart, err := c.cartRepo.FindCartByUserID(userID)
 	if err != nil {
+		logger.ErrorLogger.Println("error", err)
 		return []models.CartItem{}, err
 	}
 
 	return cart.Items, nil
 }
 
-func (c *cartServices) RemoveItemFromCart(userID string, itemID string) error {
-	objectID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return err
-	}
+func (c *cartServices) RemoveItemFromCart(userID primitive.ObjectID, itemID string) error {
 	objectItemID, err := primitive.ObjectIDFromHex(itemID)
 	if err != nil {
+		logger.ErrorLogger.Println("error", err)
 		return err
 	}
 
 	var cart *models.Cart
-	cart, err = c.cartRepo.FindCartByUserID(objectID)
+	cart, err = c.cartRepo.FindCartByUserID(userID)
 	if err != nil {
-		// if no cart exist, create one
 		if err == mongo.ErrNoDocuments {
-			return errors.New("no cart found to delete item")
+			err = errors.New("no cart found to delete item")
+			logger.ErrorLogger.Println("error", err)
+			return err
 		}
+		logger.ErrorLogger.Println("error", err)
 		return err
 	}
 
@@ -101,18 +145,18 @@ func (c *cartServices) RemoveItemFromCart(userID string, itemID string) error {
 	cart.Items = updatedItems
 	cart.TotalPrice = calculateTotal(updatedItems)
 
-	return c.cartRepo.UpdateCart(cart)
+	err = c.cartRepo.UpdateCart(cart)
+	if err != nil {
+		logger.ErrorLogger.Println("error", err)
+	}
+	return err
 }
 
-func (c *cartServices) ClearCart(userID string) error {
-	objectID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return err
-	}
-
+func (c *cartServices) ClearCart(userID primitive.ObjectID) error {
 	var cart *models.Cart
-	cart, err = c.cartRepo.FindCartByUserID(objectID)
+	cart, err := c.cartRepo.FindCartByUserID(userID)
 	if err != nil {
+		logger.ErrorLogger.Println("error", err)
 		return err
 	}
 
@@ -120,11 +164,19 @@ func (c *cartServices) ClearCart(userID string) error {
 	cart.Items = []models.CartItem{}
 	cart.TotalPrice = 0.0
 
-	return c.cartRepo.UpdateCart(cart)
+	err = c.cartRepo.UpdateCart(cart)
+	if err != nil {
+		logger.ErrorLogger.Println("error", err)
+	}
+	return err
 }
 
 func (c *cartServices) UpdateCart(cart *models.Cart) error {
-	return c.cartRepo.UpdateCart(cart)
+	err := c.cartRepo.UpdateCart(cart)
+	if err != nil {
+		logger.ErrorLogger.Println("error", err)
+	}
+	return err
 }
 
 func itemExists(cart *models.Cart, productID primitive.ObjectID) (int, bool) {

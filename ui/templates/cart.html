@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{.Title}}</title>
+  <style>
+    /* Basic Reset & Styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      line-height: 1.6;
+    }
+    header {
+      background: #333;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header .logo h1 {
+      font-size: 1.5rem;
+    }
+    header nav a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 1rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .cart {
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding: 0.5rem 0;
+    }
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+    .cart-item span {
+      margin-right: 1rem;
+    }
+    .item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .cart-total {
+      text-align: right;
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <h1>{{.Title}}</h1>
+    </div>
+    <nav>
+      {{range .Categories}}
+        <a href="/categories/{{.ID}}">{{.Name}}</a>
+      {{end}}
+      <a href="/cart">Cart</a>
+      {{if .User}}
+        <a href="/user">Profile</a>
+        <a href="/logout">Logout</a>
+      {{else}}
+        <a href="/login">Login</a>
+      {{end}}
+    </nav>
+  </header>
+  
+  <div class="container">
+    <h2>Your Cart</h2>
+    <div class="cart">
+      {{if .Cart}}
+        {{range .Cart.Items}}
+          <div class="cart-item" data-id="{{.ProductID.Hex}}">
+            <div>
+              <span>Product ID: {{.ProductID.Hex}}</span>
+              <span>Unit Price: ${{printf "%.2f" .Price}}</span>
+              <div class="item-controls">
+                <button class="decrement-item" data-id="{{.ProductID.Hex}}">-</button>
+                <span class="item-quantity">{{.Quantity}}</span>
+                <button class="increment-item" data-id="{{.ProductID.Hex}}">+</button>
+              </div>
+            </div>
+            <span>Total: ${{printf "%.2f" (mul .Price .Quantity)}}</span>
+            <button class="remove-item" data-id="{{.ProductID.Hex}}">Remove</button>
+          </div>
+        {{end}}
+        <div class="cart-total">
+          Total: ${{printf "%.2f" .Cart.TotalPrice}}
+        </div>
+        <button id="checkoutBtn">Checkout</button>
+        <button id="clearCartBtn">Clear Cart</button>
+      {{else}}
+        <p>Your cart is empty.</p>
+      {{end}}
+    </div>
+  </div>
+  
+  <script>
+    // Remove item event
+    document.querySelectorAll('.remove-item').forEach(button => {
+      button.addEventListener('click', async function () {
+        const productId = button.getAttribute('data-id');
+        try {
+          const res = await fetch(`/cart/${productId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (res.status === 204) {
+            alert("Item removed successfully");
+          } else {
+            const result = await res.json();
+            alert(result.message || "Item removed successfully");
+          }
+          window.location.reload();
+        } catch (error) {
+          console.error("Failed to remove item:", error);
+          alert("Failed to remove item");
+        }
+      });
+    });
+    
+    // Increment item quantity
+    document.querySelectorAll('.increment-item').forEach(button => {
+      button.addEventListener('click', async function () {
+        const parent = button.closest('.cart-item');
+        const productId = parent.getAttribute('data-id');
+        const quantitySpan = parent.querySelector('.item-quantity');
+        let currentQty = parseInt(quantitySpan.innerText, 10);
+        const newQty = currentQty + 1;
+        try {
+          const res = await fetch('/cart/item', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productId, quantity: newQty })
+          });
+          if (res.ok) {
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('Error updating quantity:', error);
+          alert('Error updating quantity');
+        }
+      });
+    });
+    
+    // Decrement item quantity
+    document.querySelectorAll('.decrement-item').forEach(button => {
+      button.addEventListener('click', async function () {
+        const parent = button.closest('.cart-item');
+        const productId = parent.getAttribute('data-id');
+        const quantitySpan = parent.querySelector('.item-quantity');
+        let currentQty = parseInt(quantitySpan.innerText, 10);
+        if (currentQty > 1) {
+          const newQty = currentQty - 1;
+          try {
+            const res = await fetch('/cart/item', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ product_id: productId, quantity: newQty })
+            });
+            if (res.ok) {
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error('Error updating quantity:', error);
+            alert('Error updating quantity');
+          }
+        } else {
+          alert("Quantity cannot be less than 1. Use the remove button to delete the item.");
+        }
+      });
+    });
+    
+    // Clear cart event
+    document.getElementById('clearCartBtn').addEventListener('click', async function () {
+      try {
+        const res = await fetch('/cart/clear', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+          const result = await res.json();
+          alert(result.message || "Cart cleared");
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error("Error clearing cart:", error);
+        alert("Error clearing cart");
+      }
+    });
+    
+    // Checkout event
+    document.getElementById('checkoutBtn')?.addEventListener('click', function () {
+      window.location.href = '/checkout';
+    });
+  </script>
+</body>
+</html>

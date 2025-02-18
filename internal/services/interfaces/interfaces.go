@@ -22,10 +22,12 @@ type OrderServicesInterface interface {
 }
 
 type CartServicesInterface interface {
-	AddItemToCart(userID string, item *models.CartItem) error
-	GetCartItems(userID string) ([]models.CartItem, error)
-	RemoveItemFromCart(userID string, itemID string) error
-	ClearCart(userID string) error
+	GetCart(userID primitive.ObjectID) (*models.Cart, error)
+	UpdateCartItem(userID primitive.ObjectID, productID primitive.ObjectID, quantity int) error
+	AddItemToCart(userID primitive.ObjectID, item *models.CartItem) error
+	GetCartItems(userID primitive.ObjectID) ([]models.CartItem, error)
+	RemoveItemFromCart(userID primitive.ObjectID, itemID string) error
+	ClearCart(userID primitive.ObjectID) error
 	UpdateCart(cart *models.Cart) error
 }
 

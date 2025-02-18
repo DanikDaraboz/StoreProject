@@ -20,5 +20,4 @@ func RegisterUserRoutes(s *handlers.Server) {
 
 	// Protected (Admin-only)
 	s.Router.Handle("/admin", s.Middleware.AuthMiddleware(s.Middleware.AdminOnlyMiddleware(http.HandlerFunc(s.RenderAdminPage)))).Methods("GET")
-	// s.Router.HandleFunc("/admin", s.RenderAdminPage).Methods("GET")
 }
