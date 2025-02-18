@@ -141,6 +141,8 @@ func (s *Server) UpdateCartItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) DeleteCartItem(w http.ResponseWriter, r *http.Request) {
+	logger.InfoLogger.Println("Delete cart item:")
+
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		logger.ErrorLogger.Println("Session cookie not found:", err)
@@ -165,9 +167,17 @@ func (s *Server) DeleteCartItem(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	itemID := vars["id"]
+
+	productID, err := primitive.ObjectIDFromHex(itemID)
+	if err != nil {
+		logger.ErrorLogger.Printf("Invalid product ID: %v", err)
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
 	logger.InfoLogger.Println("itemID:", itemID)
 
-	if err = s.Services.CartServices.RemoveItemFromCart(user.ID, itemID); err != nil {
+	if err = s.Services.CartServices.RemoveItemFromCart(user.ID, productID); err != nil {
 		logger.ErrorLogger.Println("Failed to remove cart item:", err)
 		http.Error(w, "Failed to remove cart item", http.StatusInternalServerError)
 		return
@@ -178,6 +188,8 @@ func (s *Server) DeleteCartItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ClearCart(w http.ResponseWriter, r *http.Request) {
+	logger.InfoLogger.Println("CartClear:")
+
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		logger.ErrorLogger.Println("Session cookie not found:", err)
@@ -199,6 +211,8 @@ func (s *Server) ClearCart(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
 	}
+
+	logger.InfoLogger.Println("CartClear:", user)
 
 	// Clear the user's cart
 	if err := s.Services.CartServices.ClearCart(user.ID); err != nil {

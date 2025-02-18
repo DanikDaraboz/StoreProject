@@ -5,30 +5,28 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/DanikDaraboz/StoreProject/internal/models"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 )
 
 func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
-	if err != nil {
+	var user *models.User = nil
+
+	if err != nil {	// Cookie not found 
 		logger.ErrorLogger.Println("Session cookie not found:", err)
-		http.Error(w, "No active session", http.StatusBadRequest)
-		return
-	}
-
-	sessionKey := cookie.Value
-	session, err := s.Services.SessionServices.FindSession(sessionKey)
-	if err != nil {
-		logger.ErrorLogger.Println("Session not found:", err)
-		http.Error(w, "No active session", http.StatusInternalServerError)
-		return
-	}
-
-	user, err := s.Services.UserServices.GetUser(session.UserID)
-	if err != nil {
-		logger.ErrorLogger.Println("User not found:", err)
-		http.Error(w, "User not found", http.StatusInternalServerError)
-		return
+	} else {
+		sessionKey := cookie.Value
+		session, err := s.Services.SessionServices.FindSession(sessionKey)
+		if err != nil {
+			logger.ErrorLogger.Println("Session not found:", err)
+		} else {
+			// Retrieve the user from the session
+			user, err = s.Services.UserServices.GetUser(session.UserID)
+			if err != nil {
+				logger.ErrorLogger.Println("User not found:", err)
+			}
+		}
 	}
 
 	// Fetch all products
@@ -47,7 +45,6 @@ func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Prepare the template data
 	data := TemplateData{
 		Title:      "Home page",
 		Products:   &products,
