@@ -3,10 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/DanikDaraboz/StoreProject/internal/models"
 	"github.com/DanikDaraboz/StoreProject/pkg/logger"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (s *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -60,20 +62,43 @@ func (s *Server) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productID := vars["id"]
 
-	var updatedProduct *models.Product
+	var updatedProduct struct {
+		Name        string  `json:"name"`
+		Description string  `json:"description"`
+		Price       float64 `json:"price"`
+		Stock       int     `json:"stock"`
+		Category    string  `json:"category"`
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&updatedProduct); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if err := s.Services.ProductServices.UpdateProduct(productID, updatedProduct); err != nil {
-		http.Error(w, "Failed to update product", http.StatusInternalServerError)
+	objectID, err := primitive.ObjectIDFromHex(productID)
+	if err != nil {
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	product := models.Product{
+		ID:          objectID,
+		Name:        updatedProduct.Name,
+		Description: updatedProduct.Description,
+		Price:       updatedProduct.Price,
+		Stock:       updatedProduct.Stock,
+		Category:    updatedProduct.Category,
+		UpdatedAt:   primitive.NewDateTimeFromTime(time.Now()),
+	}
+
+	if err := s.Services.ProductServices.UpdateProduct(productID, &product); err != nil {
+		http.Error(w, "Failed to update product: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(updatedProduct)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Product updated successfully"})
 }
 
 func (s *Server) DeleteProduct(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +114,6 @@ func (s *Server) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
-	// Get optional category filter from query parameters.
 	categoryID := r.URL.Query().Get("category_id")
 
 	// Retrieve products from the service.
@@ -106,14 +130,12 @@ func (s *Server) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Prepare template data.
 	data := TemplateData{
 		Title:      "All Products",
 		Products:   &products,
 		Categories: &categories,
 	}
 
-	// Directly execute the allproduct.html template from the cache.
 	ts, ok := s.TemplatesCache["allproducts.html"]
 	if !ok {
 		http.Error(w, "Template not found", http.StatusInternalServerError)
@@ -153,7 +175,6 @@ func (s *Server) RenderProductDetailsPage(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Extract the product ID from the URL
 	vars := mux.Vars(r)
 	productID := vars["id"]
 
@@ -164,7 +185,6 @@ func (s *Server) RenderProductDetailsPage(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Prepare the template data
 	data := TemplateData{
 		Title:      "Product Page",
 		User:       user,

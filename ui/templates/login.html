@@ -79,7 +79,13 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
+            redirect: "follow", // This makes fetch follow the redirect
           });
+
+          if (res.redirected) {
+            window.location.href = res.url; // Redirects to the correct page (either "/" or "/admin")
+            return;
+          }
 
           if (res.ok) {
             const result = await res.json();

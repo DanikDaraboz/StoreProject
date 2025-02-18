@@ -15,12 +15,14 @@ func (s *Server) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 
+	// Decode the incoming JSON payload.
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logger.ErrorLogger.Println("Failed to decode JSON:", err)
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
+	// Attempt to log in and get a session key.
 	sessionKey, err := s.Services.UserServices.LoginUser(input.Email, input.Password)
 	if sessionKey == "" || err != nil {
 		logger.WarnLogger.Println("Login failed:", err)
@@ -28,15 +30,33 @@ func (s *Server) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Set the session cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionKey,
 		HttpOnly: true,
 		Path:     "/",
 	})
+	session, err := s.Services.SessionServices.FindSession(sessionKey)
+	if err != nil {
+		logger.ErrorLogger.Println("Session not found:", err)
+		http.Error(w, "Session not found", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := s.Services.UserServices.GetUser(session.UserID)
+	if err != nil {
+		logger.ErrorLogger.Println("Failed to fetch user after login:", err)
+		http.Error(w, "Failed to fetch user after login", http.StatusUnauthorized)
+		return
+	} else if user != nil && user.Role == "admin" {
+		logger.ErrorLogger.Println("Redirecting to admin: ", user.Role)
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 	json.NewEncoder(w).Encode(sessionKey)
 }
 

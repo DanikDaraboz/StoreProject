@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// `productRepository` implements `ProductRepositoryInterface`
 var _ interfaces.ProductRepositoryInterface = (*productRepository)(nil)
 
 type productRepository struct {

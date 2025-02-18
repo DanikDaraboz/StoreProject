@@ -66,7 +66,7 @@ func (m *Middleware) AuthMiddleware(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), UserKey, user)
 
-		logger.InfoLogger.Println("User is authenticated", user)
+		// logger.InfoLogger.Println("User is authenticated", user)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -87,7 +87,7 @@ func (m *Middleware) AdminOnlyMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		logger.InfoLogger.Println("Admin is authenticated")
+		// logger.InfoLogger.Println("Admin is authenticated")
 		// Add the admin user to the context using adminKey.
 		ctx := context.WithValue(r.Context(), AdminKey, &user)
 		next.ServeHTTP(w, r.WithContext(ctx))
