@@ -85,6 +85,7 @@
     <header>
       <h1>{{ .Title }}</h1>
       <nav>
+        <a href="/">Home</a>
         <a href="/products">All Products</a>
         {{ range .Categories }}
           <a href="/products?category_id={{ .ID.Hex }}">{{ .Name }}</a>

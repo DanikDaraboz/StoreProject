@@ -146,6 +146,8 @@
         <h1>{{ .Title }}</h1>
       </div>
       <nav>
+        <a href="/">Home</a>
+
         {{ range .Categories }}
           <a href="/products?category_id={{ .ID.Hex }}">{{ .Name }}</a>
         {{ end }}
