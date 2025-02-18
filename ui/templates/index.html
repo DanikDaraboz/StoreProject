@@ -79,6 +79,58 @@
       .add-to-cart:hover {
         background: #555;
       }
+/* Container for stacking notifications */
+#notification-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column-reverse; /* Newest on top */
+  gap: 10px;
+  z-index: 1000;
+}
+
+/* Notification Styles */
+.notification {
+  min-width: 250px;
+  padding: 15px 20px;
+  border-radius: 5px;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  animation: slide-in 0.5s ease;
+}
+
+/* Slide-in from right */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Fade out on close */
+.notification.fade-out {
+  opacity: 0;
+}
+
+/* Color variations */
+.notification.success {
+  background-color: #28a745;
+}
+
+.notification.error {
+  background-color: #dc3545;
+}
+
+.notification.info {
+  background-color: #007bff;
+}
     </style>
   </head>
   <body>
@@ -128,28 +180,29 @@
     </div>
 
     <script>
-      // Redirect to product details when clicking on a card (unless clicking the button)
-      document.querySelectorAll(".card").forEach((card) => {
-        card.addEventListener("click", function (e) {
-          // Prevent redirection if the click is on the Add to Cart button
-          if (e.target.closest(".add-to-cart")) return;
-          const productId = card.getAttribute("data-id");
-          window.location.href = `/products/${productId}`;
-        });
-      });
+      // Create a container for notifications if it doesn't exist
+      let notificationContainer = document.getElementById("notification-container");
+      if (!notificationContainer) {
+        notificationContainer = document.createElement("div");
+        notificationContainer.id = "notification-container";
+        document.body.appendChild(notificationContainer);
+      }
 
-      // Handle "Add to Cart" button clicks with an async POST request
-      document.querySelectorAll(".add-to-cart").forEach((button) => {
-        button.addEventListener("click", async function (e) {
-          e.stopPropagation(); // Prevent the card click event from firing
-          const card = button.closest(".card");
+      document.body.addEventListener("click", async (e) => {
+        // Handle Add to Cart button clicks
+        const addToCartBtn = e.target.closest(".add-to-cart");
+        if (addToCartBtn) {
+          e.stopPropagation();
+          const card = addToCartBtn.closest(".card");
           const productId = card.getAttribute("data-id");
           const price = parseFloat(card.getAttribute("data-price"));
+          
           const payload = {
             product_id: productId,
             quantity: 1,
             price: price,
           };
+
           try {
             const res = await fetch("/cart", {
               method: "POST",
@@ -157,13 +210,40 @@
               body: JSON.stringify(payload),
             });
             const result = await res.json();
-            alert(result.message || "Product added to cart");
+            showNotification(result.message || "Product added to cart", "success");
           } catch (err) {
             console.error("Error adding to cart:", err);
-            alert("Error adding to cart");
+            showNotification("Failed to add product to cart", "error");
           }
-        });
+          return;
+        }
+
+        // Handle card clicks for product details
+        const card = e.target.closest(".card");
+        if (card) {
+          const productId = card.getAttribute("data-id");
+          window.location.href = `/products/${productId}`;
+        }
       });
+
+      // Helper function for stacking notifications
+      function showNotification(message, type = "info") {
+        const notification = document.createElement("div");
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        
+        // Add notification to container
+        notificationContainer.appendChild(notification);
+
+        // Automatically remove notification after 4 seconds
+        setTimeout(() => {
+          notification.classList.add("fade-out");
+          notification.addEventListener("transitionend", () => {
+            notification.remove();
+          });
+        }, 4000);
+      }
+
     </script>
   </body>
 </html>
