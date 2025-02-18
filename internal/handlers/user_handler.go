@@ -96,8 +96,9 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Logged out successfully"})
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(map[string]string{"message": "Logged out successfully"})
 }
 
 func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -220,7 +221,7 @@ func (s *Server) RenderAdminPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Retrieve all products via the product service.
-	products, err := s.Services.ProductServices.GetAllProducts()
+	products, err := s.Services.ProductServices.GetProducts("")
 	if err != nil {
 		logger.ErrorLogger.Println("Error retrieving products:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

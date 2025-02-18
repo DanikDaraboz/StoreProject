@@ -1,105 +1,227 @@
+{{ define "product.html" }}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Product.Name}}</title>  <!-- Используем .Product для доступа к данным товара -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ .Title }} - {{ .Product.Name }}</title>
+    <style>
+      /* Basic Reset & Styling */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        line-height: 1.6;
+        padding: 1rem;
+      }
+      header {
+        background: #333;
+        color: #fff;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header .logo h1 {
+        font-size: 1.5rem;
+      }
+      header nav a {
+        color: #fff;
+        text-decoration: none;
+        margin-left: 1rem;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .product-details {
+        padding: 1rem;
+      }
+      .product-images {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .product-images img {
+        max-width: 100%;
+        border: 1px solid #eee;
+        border-radius: 4px;
+      }
+      .thumbnail-container {
+        margin-top: 0.5rem;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+      .thumbnail-container img {
+        width: 80px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .product-info h2 {
+        margin-bottom: 0.5rem;
+      }
+      .product-info p {
+        margin-bottom: 0.5rem;
+      }
+      .add-to-cart {
+        margin-top: 1rem;
+      }
+      .add-to-cart input[type="number"] {
+        width: 60px;
+        margin-right: 10px;
+      }
+      .add-to-cart button {
+        padding: 0.5rem 1rem;
+        background: #007bff;
+        border: none;
+        color: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .add-to-cart button:hover {
+        background: #0056b3;
+      }
+      footer {
+        text-align: center;
+        padding: 1rem;
+        background: #f1f1f1;
+        margin-top: 2rem;
+      }
+      /* Notifications (same as index.html) */
+      #notification-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 10px;
+        z-index: 1000;
+      }
+      .notification {
+        min-width: 250px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        opacity: 1;
+        transition: opacity 0.5s ease;
+        animation: slide-in 0.5s ease;
+      }
+      @keyframes slide-in {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      .notification.fade-out {
+        opacity: 0;
+      }
+      .notification.success {
+        background-color: #28a745;
+      }
+      .notification.error {
+        background-color: #dc3545;
+      }
+      .notification.info {
+        background-color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header / Navigation -->
     <header>
-        <nav class="navbar2">
-            <div class="sign">
-                <a href="/login" class="sign-in-btn">Sign In</a>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <img id="sun-icon" src="/static/images/sun.png" alt="Sun Icon" class="theme-icon">
-                    <img id="moon-icon" src="/static/images/moon.png" alt="Moon Icon" class="theme-icon2">
-                </button>
-            </div>
-        </nav>
-        <nav class="navbar">
-            <div class="logo2">
-                <a href="index.html" class="logo-link">
-                    <img src="/static/images/logo.png" alt="Logo" class="logo">
-                </a>
-            </div>
-            <ul class="nav-list">
-                <li class="nav-item"><a href="/h">Home</a></li>
-                <li class="nav-item"> <div class="catalog">
-                    <label for="catalog-toggle" id="catalog-text">Catalog</label>
-                    <input type="checkbox" id="catalog-toggle" class="catalog-toggle">
-                    <div class="category-menu">
-                        <ul>
-                            <li data-category="all"><a href="/all">All products</a></li>
-                            {{range .Categories}}
-                                <li><a href="/category/{{.}}">{{.}}</a></li>
-                            {{end}}
-                        </ul>
-                    </div>
-                </div></li>
-                <li class="nav-item"><a href="#men">Men</a></li>
-                <li class="nav-item"><a href="#women">Women</a></li>
-                <a href="/favorites"class="fix"><img src="/static/images/favorites2.png" alt="" id="favorites3"></a>
-                <li class="nav-item"><button onclick="window.history.back()" class="go-back-button">Go Back</button></li>
-                <a href="/cart"class="fix" style="position: absolute; margin-left: 55%;"><img src="/static/images/cart.png" alt="" id="favorites3"></a>
-            </ul>
-        </nav>
+      <div class="logo">
+        <h1>{{ .Title }}</h1>
+      </div>
+      <nav>
+        {{ range .Categories }}
+          <a href="/products?category_id={{ .ID.Hex }}">{{ .Name }}</a>
+        {{ end }}
+        <a href="/cart">Cart</a>
+        {{ if .User }}
+          <a href="/user">Profile</a>
+          <a href="/logout">Logout</a>
+        {{ else }}
+          <a href="/login">Login</a>
+        {{ end }}
+      </nav>
     </header>
 
-    <main>
-        <div class="product-detail">
-            <img src="{{.Product.Image}}" alt="{{.Product.Name}}" class="product-detail-image"> <!-- Доступ к данным продукта -->
-            <div class="product-info">
-                <h2>Price: ${{.Product.Price}}</h2> <!-- Цена товара -->
-                <button class="add-to-cart" data-id="{{ .Product.ID }}">Add to Cart</button>
-
-            </div>
+    <!-- Main Content -->
+    <div class="container">
+      <div class="product-details">
+        <!-- Product Images with Thumbnails -->
+        <div class="product-images">
+          {{ if .Product.Images }}
+            <img id="mainImage" src="{{ index .Product.Images 0 }}" alt="{{ .Product.Name }}">
+            {{ if gt (len .Product.Images) 1 }}
+              <div class="thumbnail-container">
+                {{ range .Product.Images }}
+                  <img src="{{ . }}" alt="{{ $.Product.Name }}" onclick="document.getElementById('mainImage').src=this.src">
+                {{ end }}
+              </div>
+            {{ end }}
+          {{ else }}
+            <img src="/static/default.jpg" alt="No image available">
+          {{ end }}
         </div>
-    </main>
 
-    <footer style="margin-top: 200px;">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h1>Product</h1>
-                <ul>
-                    <li><a href="/category/football">Football</a></li>
-                    <li><a href="/category/tennis">Tennis</a></li>
-                    <li><a href="/category/basketball">Basketball</a></li>
-                    <li><a href="/category/baseball">Baseball</a></li>
-                </ul>
-            </div>
-            
-        
-    
-            <div class="footer-section">
-                <h1>Support</h1>
-                <ul>
-                    <li><a href="/help">Help</a></li>
-                    <li><a href="/customer-service">Customer Service</a></li>
-                    <li><a href="/shipping">Shipping</a></li>
-                    <li><a href="/order-tracker">Order Tracker</a></li>
-                    <li><a href="/returns">Returns & Exchanges</a></li>
-                </ul>
-            </div>
-    
-            <div class="footer-section">
-                <h1>Company Info</h1>
-                <ul>
-                    <li><a href="/about-us">About Us</a></li>
-                    <li><a href="/entity-details">Entity Details</a></li>
-                    <li><a href="/careers">Careers</a></li>
-                    <li><a href="/apps">Company Apps</a></li>
-                </ul>
-            </div>
+        <!-- Product Information -->
+        <div class="product-info">
+          <h2>{{ .Product.Name }}</h2>
+          <p>{{ .Product.Description }}</p>
+          <p><strong>Price: ${{ printf "%.2f" .Product.Price }}</strong></p>
+          <p>Stock: {{ .Product.Stock }}</p>
+          <p>Category: {{ .Product.Category }}</p>
         </div>
-        <p>&copy; 2025 Sports Goods Store</p>
+
+        <!-- Add to Cart Form -->
+        <div class="add-to-cart">
+          <form action="/cart" method="POST">
+            <input type="hidden" name="product_id" value="{{ .Product.ID.Hex }}">
+            <label for="quantity">Quantity:</label>
+            <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ .Product.Stock }}">
+            <button type="submit">Add to Cart</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 Your Company Name. All rights reserved.</p>
     </footer>
-    <script src="/static/theme-toggle.js"></script>
-    <script src="/static/active.js"></script>
-    <script src="/static/catalog.js"></script>
-    <script src="/static/account.js"></script>
-    <script src="/static/cart.js"></script>
-</body>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+    <script>
+      // Helper function for stacking notifications
+      function showNotification(message, type = "info") {
+        const container = document.getElementById("notification-container");
+        const notification = document.createElement("div");
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        container.appendChild(notification);
+        setTimeout(() => {
+          notification.classList.add("fade-out");
+          notification.addEventListener("transitionend", () => {
+            notification.remove();
+          });
+        }, 4000);
+      }
+    </script>
+  </body>
 </html>
+{{ end }}

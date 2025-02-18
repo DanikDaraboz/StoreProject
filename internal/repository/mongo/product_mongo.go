@@ -22,19 +22,30 @@ func NewProductRepository(collection *mongo.Collection) interfaces.ProductReposi
 	return &productRepository{collection: collection}
 }
 
-// TODO Pagination?
-func (p *productRepository) GetProducts() ([]models.Product, error) {
+func (r *productRepository) GetProducts(categoryID string) ([]models.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cursor, err := p.collection.Find(ctx, bson.M{})
+	// Construct query: filter by category if provided
+	filter := bson.M{}
+	if categoryID != "" {
+		oid, err := primitive.ObjectIDFromHex(categoryID)
+		if err != nil {
+			return nil, err
+		}
+		filter["category_id"] = oid
+	}
+
+	// Execute query
+	cursor, err := r.collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
+	// Decode results into products slice
 	var products []models.Product
-	if err = cursor.All(ctx, &products); err != nil {
+	if err := cursor.All(ctx, &products); err != nil {
 		return nil, err
 	}
 

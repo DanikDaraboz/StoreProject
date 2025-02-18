@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
-	products, err := s.Services.ProductServices.GetAllProducts()
+	products, err := s.Services.ProductServices.GetProducts("")
 	if err != nil {
 		logger.ErrorLogger.Println("Error fetching products:", err)
 		http.Error(w, "Failed to fetch products", http.StatusInternalServerError)
@@ -89,9 +89,93 @@ func (s *Server) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) RenderProductsPage(w http.ResponseWriter, r *http.Request) {
+	// Get optional category filter from query parameters.
+	categoryID := r.URL.Query().Get("category_id")
 
+	// Retrieve products from the service.
+	products, err := s.Services.ProductServices.GetProducts(categoryID)
+	if err != nil {
+		http.Error(w, "Failed to fetch products", http.StatusInternalServerError)
+		return
+	}
+
+	// Retrieve categories for navigation.
+	categories, err := s.Services.CategoryService.GetAllCategories()
+	if err != nil {
+		http.Error(w, "Failed to fetch categories", http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare template data.
+	data := TemplateData{
+		Title:      "All Products",
+		Products:   &products,
+		Categories: &categories,
+	}
+
+	// Directly execute the allproduct.html template from the cache.
+	ts, ok := s.TemplatesCache["allproducts.html"]
+	if !ok {
+		http.Error(w, "Template not found", http.StatusInternalServerError)
+		return
+	}
+	if err := ts.Execute(w, data); err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+	}
 }
 
 func (s *Server) RenderProductDetailsPage(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	var user *models.User = nil
 
+	if err != nil {
+		// Session cookie not found
+		logger.ErrorLogger.Println("Session cookie not found:", err)
+	} else {
+		sessionKey := cookie.Value
+		session, err := s.Services.SessionServices.FindSession(sessionKey)
+		if err != nil {
+			logger.ErrorLogger.Println("Session not found:", err)
+		} else {
+			// Retrieve the user associated with this session
+			user, err = s.Services.UserServices.GetUser(session.UserID)
+			if err != nil {
+				logger.ErrorLogger.Println("User not found:", err)
+			}
+		}
+	}
+
+	// Fetch all categories for the navigation menu
+	categories, err := s.Services.CategoryService.GetAllCategories()
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to fetch categories: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Extract the product ID from the URL
+	vars := mux.Vars(r)
+	productID := vars["id"]
+
+	// Retrieve product details using the product ID
+	product, err := s.Services.ProductServices.GetProductByID(productID)
+	if err != nil {
+		http.Error(w, "Product not found", http.StatusNotFound)
+		return
+	}
+
+	// Prepare the template data
+	data := TemplateData{
+		Title:      "Product Page",
+		User:       user,
+		Product:    product,
+		Categories: &categories,
+	}
+
+	ts := s.TemplatesCache["product.html"]
+	if err := ts.Execute(w, data); err != nil {
+		logger.ErrorLogger.Println("Failed to render template:", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }

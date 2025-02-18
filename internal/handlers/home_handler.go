@@ -13,7 +13,7 @@ func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	var user *models.User = nil
 
-	if err != nil {	// Cookie not found 
+	if err != nil { // Cookie not found
 		logger.ErrorLogger.Println("Session cookie not found:", err)
 	} else {
 		sessionKey := cookie.Value
@@ -30,7 +30,7 @@ func (s *Server) RenderHomePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fetch all products
-	products, err := s.Services.ProductServices.GetAllProducts()
+	products, err := s.Services.ProductServices.GetProducts("")
 	if err != nil {
 		logger.ErrorLogger.Printf("Failed to fetch products: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)

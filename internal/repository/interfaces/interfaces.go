@@ -8,7 +8,7 @@ import (
 )
 
 type ProductRepositoryInterface interface {
-	GetProducts() ([]models.Product, error)
+	GetProducts(categoryID string) ([]models.Product, error)
 	FetchProductByID(id string) (*models.Product, error)
 	InsertProduct(product *models.Product) error
 	UpdateProduct(id string, product *models.Product) error

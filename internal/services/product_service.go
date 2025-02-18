@@ -20,23 +20,22 @@ func NewProductServices(productRepo repoInterface.ProductRepositoryInterface) in
 	return &productService{productRepo: productRepo}
 }
 
-func (p *productService) GetAllProducts() ([]models.Product, error) {
-	products, err := p.productRepo.GetProducts()
+func (p *productService) GetProducts(categoryID string) ([]models.Product, error) {
+	// Call the repository to get products with optional category filter
+	products, err := p.productRepo.GetProducts(categoryID)
 	if err != nil {
 		logger.ErrorLogger.Println("Error fetching products:", err)
 		return nil, err
 	}
-	// TODO
-	// allow users to filter by category, price range, or availability
-	// pagination parameters like limit, offset, or page
-	// product.Images ensure they are valid URLs
-	// validating product.Category with predefined categories
 
-	// safe stock updates to prevent race conditions! 	add (Version  int `json:"version"`)
+	// TODO:
+	// - Validate product categories against predefined categories.
+	// - Ensure product.Images contains valid URLs.
+	// - Implement pagination for large datasets.
+	// - Add safe stock updates to prevent race conditions.
 
 	return products, nil
 }
-
 func (p *productService) GetProductByID(id string) (*models.Product, error) {
 	if id == "" {
 		return &models.Product{}, errors.New("product ID cannot be empty")

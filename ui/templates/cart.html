@@ -84,9 +84,9 @@
       <h1>{{.Title}}</h1>
     </div>
     <nav>
-      {{range .Categories}}
-        <a href="/categories/{{.ID}}">{{.Name}}</a>
-      {{end}}
+      {{ range .Categories }}
+      <a href="/products?category_id={{ .ID.Hex }}">{{ .Name }}</a>
+     {{ end }}
       <a href="/cart">Cart</a>
       {{if .User}}
         <a href="/user">Profile</a>
