@@ -21,7 +21,7 @@ func LoadConfig() Config {
 
 	return Config{
 		ServerPort: getEnv("SERVER_PORT", "8080"),
-		MongoURI:   getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		MongoURI:   getEnv("MONGO_URI", "mongodb+srv://danchik:denchik2006@cluster0.ed6vt.mongodb.net/"),
 	}
 }
 
